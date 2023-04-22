@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.github.terefang</groupId>
+        <groupId>com.github.terefang.luay</groupId>
         <artifactId>luay</artifactId>
-        <version>2023.4.222</version>
+        <version>2023.4.229</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -21,25 +21,31 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.26</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.9.1</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.github.terefang.jmelange</groupId>
-            <artifactId>commons-jmelange</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.terefang.jmelange</groupId>
-            <artifactId>luay-jmelange</artifactId>
+         <dependency>
+            <groupId>com.github.terefang.luay</groupId>
+            <artifactId>luay-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>${version.okhttp}</version>
+            <version>4.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.terefang.jmelange</groupId>
+            <artifactId>commons-jmelange</artifactId>
+            <version>2023.4.222</version>
         </dependency>
     </dependencies>
 
