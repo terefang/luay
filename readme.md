@@ -1,0 +1,319 @@
+# a luaj hard-fork for selfish purposes
+  
+* since luaj 3.0.2 seems to remain static, a new evolution is needed.
+* scripting under java is fun and has applications
+* jme is dead
+
+## DONE
+
+see docs
+
+## TODO
+
+- [ ] evaluate libuseful-lua, what to implement
+    - [x] entropy
+    - [ ] filesys
+    - [ ] hash
+- [ ] evaluate https://github.com/aiq/luazdf, what to implement
+    - [ ] algo/algo
+    - [ ] algo/luhn/luhn
+    - [ ] arr/appendall/appendall
+    - [ ] arr/append/append
+    - [ ] arr/arr
+    - [ ] arr/chunk/chunk
+    - [ ] arr/collectk/collectk
+    - [ ] arr/collectv/collectv
+    - [ ] arr/count/count
+    - [ ] arr/cutarr/cutarr
+    - [ ] arr/difference/difference
+    - [ ] arr/findif/findif
+    - [ ] arr/flatten/flatten
+    - [ ] arr/group/group
+    - [ ] arr/indexof/indexof
+    - [ ] arr/insertall/insertall
+    - [ ] arr/intersection/intersection
+    - [ ] arr/last/last
+    - [ ] arr/like/like
+    - [ ] arr/map/map
+    - [ ] arr/occurasc/occurasc
+    - [ ] arr/removeif/removeif
+    - [ ] arr/removerange/removerange
+    - [ ] arr/reverse/reverse
+    - [ ] arr/selectif/selectif
+    - [ ] arr/shuffle/shuffle
+    - [ ] arr/slice/slice
+    - [ ] arr/some/some
+    - [ ] arr/splice/splice
+    - [ ] arr/unwrap/unwrap
+    - [ ] arr/without/without
+    - [ ] arr/zip/zip
+    - [ ] base/base
+    - [ ] base/frombase16/frombase16
+    - [ ] base/frombase2/frombase2
+    - [ ] base/frombase32/frombase32
+    - [ ] base/frombase32hex/frombase32hex
+    - [ ] base/frombase64/frombase64
+    - [ ] base/frombase64url/frombase64url
+    - [ ] base/fromcrockford32/fromcrockford32
+    - [ ] base/fromz85/fromz85
+    - [ ] base/tobase16/tobase16
+    - [ ] base/tobase2/tobase2
+    - [ ] base/tobase32hex/tobase32hex
+    - [ ] base/tobase32/tobase32
+    - [ ] base/tobase64/tobase64
+    - [ ] base/tobase64url/tobase64url
+    - [ ] base/tocrockford32/tocrockford32
+    - [ ] base/toz85/toz85
+    - [ ] cal/cal
+    - [ ] cal/dayofweek/dayofweek
+    - [ ] cal/gregdate/gregdate
+    - [ ] cal/isleapyear/isleapyear
+    - [ ] cal/julianday/julianday
+    - [ ] cal/tilldayofweek/tilldayofweek
+    - [ ] cli/argsfileinargs/argsfileinargs
+    - [ ] cli/argsfilesindir/argsfilesindir
+    - [ ] cli/cli
+    - [ ] cli/escapeshellarg/escapeshellarg
+    - [ ] cli/getoptpair/getoptpair
+    - [ ] cli/getoptvalues/getoptvalues
+    - [ ] cli/isoneshellarg/isoneshellarg
+    - [ ] cli/shelljoin/shelljoin
+    - [ ] cli/shellsplit/shellsplit
+    - [ ] fn/caddr/caddr
+    - [ ] fn/cadr/cadr
+    - [ ] fn/car/car
+    - [ ] fn/cddr/cddr
+    - [ ] fn/cdr/cdr
+    - [ ] fn/compose/compose
+    - [ ] fn/constantly/constantly
+    - [ ] fn/eqf/eqf
+    - [ ] fn/fn
+    - [ ] fn/fnil/fnil
+    - [ ] fn/gtef/gtef
+    - [ ] fn/gtf/gtf
+    - [ ] fn/iscallable/iscallable
+    - [ ] fn/juxt/juxt
+    - [ ] fn/lambda/lambda
+    - [ ] fn/ltef/ltef
+    - [ ] fn/ltf/ltf
+    - [ ] fn/matchesf/matchesf
+    - [ ] fn/notf/notf
+    - [ ] fn/nth/nth
+    - [ ] fn/once/once
+    - [ ] fn/partial/partial
+    - [ ] fn/repeatedly/repeatedly
+    - [ ] fs/abspath/abspath
+    - [ ] fs/appendfile/appendfile
+    - [ ] fs/basename/basename
+    - [ ] fs/copyfile/copyfile
+    - [ ] fs/currentdir/currentdir
+    - [ ] fs/cutpath/cutpath
+    - [ ] fs/delimiter/delimiter
+    - [ ] fs/dirfiles/dirfiles
+    - [ ] fs/dirhas/dirhas
+    - [ ] fs/dirif/dirif
+    - [ ] fs/dirmatch/dirmatch
+    - [ ] fs/dirname/dirname
+    - [ ] fs/dirtree/dirtree
+    - [ ] fs/extname/extname
+    - [ ] fs/filelist/filelist
+    - [ ] fs/filename/filename
+    - [ ] fs/findup/findup
+    - [ ] fs/fs
+    - [ ] fs/isabsolute/isabsolute
+    - [ ] fs/isdir/isdir
+    - [ ] fs/isdodd/isdodd
+    - [ ] fs/isfile/isfile
+    - [ ] fs/isleafdir/isleafdir
+    - [ ] fs/isposixname/isposixname
+    - [ ] fs/isreadable/isreadable
+    - [ ] fs/iswindowsname/iswindowsname
+    - [ ] fs/joinpath/joinpath
+    - [ ] fs/longextname/longextname
+    - [ ] fs/mkdirtree/mkdirtree
+    - [ ] fs/mkpath/mkpath
+    - [ ] fs/normpath/normpath
+    - [ ] fs/readargsfile/readargsfile
+    - [ ] fs/readfile/readfile
+    - [ ] fs/readlines/readlines
+    - [ ] fs/readmxtfile/readmxtfile
+    - [ ] fs/relativepath/relativepath
+    - [ ] fs/rmdirtree/rmdirtree
+    - [ ] fs/rootprefix/rootprefix
+    - [ ] fs/separator/separator
+    - [ ] fs/shortfilename/shortfilename
+    - [ ] fs/splitpath/splitpath
+    - [ ] fs/subdirs/subdirs
+    - [ ] fs/syspath/syspath
+    - [ ] fs/unixpath/unixpath
+    - [ ] fs/winpath/winpath
+    - [ ] fs/writefile/writefile
+    - [ ] fs/writelines/writelines
+    - [ ] graph/addedge/addedge
+    - [ ] graph/adjmatrix/adjmatrix
+    - [ ] graph/buildgraph/buildgraph
+    - [ ] graph/graph
+    - [ ] graph/isolatednodes/isolatednodes
+    - [ ] graph/leafnodes/leafnodes
+    - [ ] graph/pathedges/pathedges
+    - [ ] graph/rmedge/rmedge
+    - [ ] graph/rmnode/rmnode
+    - [ ] graph/sinknodes/sinknodes
+    - [ ] graph/transposegraph/transposegraph
+    - [ ] graph/tsort2d/tsort2d
+    - [ ] graph/tsort/tsort
+    - [ ] math/acosh/acosh
+    - [ ] math/acoth/acoth
+    - [ ] math/asinh/asinh
+    - [ ] math/atan2/atan2
+    - [ ] math/atanh/atanh
+    - [ ] math/cbrt/cbrt
+    - [ ] math/cosh/cosh
+    - [ ] math/cot/cot
+    - [ ] math/coth/coth
+    - [ ] math/csc/csc
+    - [ ] math/csch/csch
+    - [ ] math/digitsum/digitsum
+    - [ ] math/fact2/fact2
+    - [ ] math/fact/fact
+    - [ ] math/gcd/gcd
+    - [ ] math/isfinite/isfinite
+    - [ ] math/isinf/isinf
+    - [ ] math/isnan/isnan
+    - [ ] math/lcm/lcm
+    - [ ] math/math
+    - [ ] math/matrixtostrlst/matrixtostrlst
+    - [ ] math/minmax/minmax
+    - [ ] math/product/product
+    - [ ] math/rounddown/rounddown
+    - [ ] math/round/round
+    - [ ] math/roundup/roundup
+    - [ ] math/sech/sech
+    - [ ] math/sec/sec
+    - [ ] math/sinh/sinh
+    - [ ] math/sum/sum
+    - [ ] math/tanh/tanh
+    - [ ] num/asindex/asindex
+    - [ ] num/clamp/clamp
+    - [ ] num/inrange/inrange
+    - [ ] num/iseven/iseven
+    - [ ] num/isinteger/isinteger
+    - [ ] num/num
+    - [ ] num/numseq/numseq
+    - [ ] num/toarabic/toarabic
+    - [ ] num/toroman/toroman
+    - [ ] num/trunc/trunc
+    - [ ] str/asciichunks/asciichunks
+    - [ ] str/camelcase/camelcase
+    - [ ] str/caretpos/caretpos
+    - [ ] str/charat/charat
+    - [ ] str/chomp/chomp
+    - [ ] str/countmatch/countmatch
+    - [ ] str/cutstr/cutstr
+    - [ ] str/endswithany/endswithany
+    - [ ] str/endswith/endswith
+    - [ ] str/expandtabs/expandtabs
+    - [ ] str/explode/explode
+    - [ ] str/findbyte/findbyte
+    - [ ] str/firstchar/firstchar
+    - [ ] str/hammingdistance/hammingdistance
+    - [ ] str/isalnum/isalnum
+    - [ ] str/isalpha/isalpha
+    - [ ] str/isblank/isblank
+    - [ ] str/iscntrl/iscntrl
+    - [ ] str/isdigit/isdigit
+    - [ ] str/isxdigit/isxdigit
+    - [ ] str/kebabcase/kebabcase
+    - [ ] str/lastchar/lastchar
+    - [ ] str/leftpad/leftpad
+    - [ ] str/linecol/linecol
+    - [ ] str/lines/lines
+    - [ ] str/logline/logline
+    - [ ] str/ltrim/ltrim
+    - [ ] str/lualiteral/lualiteral
+    - [ ] str/mint/mint
+    - [ ] str/numeronym/numeronym
+    - [ ] str/rightpad/rightpad
+    - [ ] str/rmprefix/rmprefix
+    - [ ] str/rmsuffix/rmsuffix
+    - [ ] str/rtrim/rtrim
+    - [ ] str/serialize/serialize
+    - [ ] str/snakecase/snakecase
+    - [ ] str/split/split
+    - [ ] str/startswithany/startswithany
+    - [ ] str/startswith/startswith
+    - [ ] str/str
+    - [ ] str/strlstlen/strlstlen
+    - [ ] str/trim/trim
+    - [ ] str/utf8codes/utf8codes
+    - [ ] sys/capexec/capexec
+    - [ ] sys/capinexec/capinexec
+    - [ ] sys/rmcmdline/rmcmdline
+    - [ ] sys/sys
+    - [ ] sys/sysinfo/sysinfo
+    - [ ] sys/taptest/taptest
+    - [ ] tab/accessor/accessor
+    - [ ] tab/buildset/buildset
+    - [ ] tab/clear/clear
+    - [ ] tab/countlen/countlen
+    - [ ] tab/deepcopy/deepcopy
+    - [ ] tab/divorce/divorce
+    - [ ] tab/dump/dump
+    - [ ] tab/flyweightstore/flyweightstore
+    - [ ] tab/getin/getin
+    - [ ] tab/invertby/invertby
+    - [ ] tab/isarray/isarray
+    - [ ] tab/isdict/isdict
+    - [ ] tab/isempty/isempty
+    - [ ] tab/isfilled/isfilled
+    - [ ] tab/keys/keys
+    - [ ] tab/marry/marry
+    - [ ] tab/pluck/pluck
+    - [ ] tab/same/same
+    - [ ] tab/setin/setin
+    - [ ] tab/shallowcopy/shallowcopy
+    - [ ] tab/tab
+    - [ ] tab/tableize/tableize
+    - [ ] tab/tuple/tuple
+    - [ ] tab/updatein/updatein
+    - [ ] tab/values/values
+- [ ] implement lua 5.4 std modules and changes ?
+- [ ] evaluate commonly packaged modules, what to implement
+    - [ ] https://github.com/Tieske/binaryheap.lua
+    - [ ] lua-alt-getopt-0.8.0-1.el8.noarch.rpm	Argument processing module for Lua
+    - [ ] lua-basexx-0.4.0-2.el8.noarch.rpm	BaseXX encoding and decoding library for Lua
+    - [ ] lua-binaryheap-0.4-1.el8.noarch.rpm	Binary heap implementation for Lua
+    - [ ] lua-bit32-5.3.5.1-1.el8.x86_64.rpm	Lua bit manipulation library
+    - [ ] lua5.1-bitop-1.0.2-5.el8.x86_64.rpm	C extension module for Lua 5.1 which adds bit-wise operations on numbers
+    - [ ] lua-compat53-0.7-3.el7.x86_64.rpm	Compatibility module providing Lua-5.3-style APIs for Lua 5.1
+    - [ ] lua-cqueues-20190813-3.el7.x86_64.rpm	Stackable Continuation Queues for the Lua Programming Language
+    - [ ] lua-cqueues-doc-20190813-3.el7.noarch.rpm	Documentation for the Stackable Continuation Queues library
+    - [ ] lua-cyrussasl-1.1.0-1.el7.x86_64.rpm	Cyrus SASL library for Lua
+    - [ ] lua-cjson-2.1.0.12-1.el8.x86_64.rpm	Lua Extension: JSON Encoding/Decoding
+    - [ ] lua-dbi-0.7.2-1.el7.x86_64.rpm	Database interface library for Lua
+    - [ ] lua-event-0.4.6-1.el7.x86_64.rpm	This is a binding of libevent to Lua
+    - [ ] lua-expat-1.4.1-1.el7.x86_64.rpm	SAX XML parser based on the Expat library
+    - [ ] lua-fifo-0.2-1.el7.noarch.rpm	FIFO library for Lua
+    - [ ] lua-filesystem-1.6.2-2.el7.x86_64.rpm	File System Library for the Lua Programming Language
+    - [ ] lua-fun-0.1.3-1.el7.noarch.rpm	Functional programming library for Lua
+    - [ ] lua-http-0.3-5.el7.noarch.rpm	HTTP library for Lua
+    - [ ] lua-http-doc-0.3-5.el7.noarch.rpm	Documentation for HTTP library for Lua
+    - [ ] lua-json-1.3.2-2.el7.noarch.rpm	JSON Parser/Constructor for Lua
+    - [ ] lua-ldap-1.1.0-3.el7.x86_64.rpm	LDAP client library for Lua, using OpenLDAP
+    - [ ] lua-ldap-compat-1.1.0-20.el8.x86_64.rpm	LDAP client library for Lua 5.1, using OpenLDAP
+    - [ ] lua-lpeg-0.12-1.el7.x86_64.rpm	Parsing Expression Grammars for Lua
+    - [ ] lua-lpeg-patterns-0.5-1.el7.noarch.rpm	A collection of LPEG patterns
+    - [ ] lua-luaossl-20190731-1.el7.x86_64.rpm	Most comprehensive OpenSSL module in the Lua universe
+    - [ ] lua-luaossl-doc-20190731-1.el7.noarch.rpm	Documentation for OpenSSL Lua module
+    - [ ] lua-lunit-0.5-5.el7.noarch.rpm	Unit testing framework for Lua
+    - [ ] lua-md5-1.1.2-1.el7.x86_64.rpm	Cryptographic Library for MD5 hashes for Lua
+    - [ ] lua-mmdb-0.2-1.el7.noarch.rpm	MaxMind database parser for Lua
+    - [ ] lua-mpack-1.0.4-2.el7.x86_64.rpm	Implementation of MessagePack for Lua
+    - [ ] lua-posix-32-2.el7.x86_64.rpm	A POSIX library for Lua
+    - [ ] lua-prelude-5.2.0-2.el7.x86_64.rpm	Lua bindings for prelude
+    - [ ] lua-psl-0.3-2.el7.x86_64.rpm	Lua bindings to Public Suffix List library
+    - [ ] lua-readline-3.2-1.el7.x86_64.rpm	Lua interface to the readline and history libraries
+    - [ ] lua-sec-1.2.0-1.el7.x86_64.rpm	Lua binding for OpenSSL library
+    - [ ] lua-socket-3.1.0-1.el7.x86_64.rpm	Network support for the Lua language
+    - [ ] lua-term-0.03-3.el7.x86_64.rpm	Terminal functions for Lua
+    - [ ] lua-unbound-1.0.0-1.el7.x86_64.rpm	Binding to libunbound for Lua
