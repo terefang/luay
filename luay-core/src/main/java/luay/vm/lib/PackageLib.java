@@ -30,11 +30,9 @@ import luay.vm.LuaString;
 import luay.vm.LuaTable;
 import luay.vm.LuaValue;
 import luay.vm.Varargs;
-import luay.vm.lib.java.CoerceJavaToLua;
 import luay.vm.lib.java.JsePlatform;
-import luay.vm.luay.AbstractLibrary;
-import luay.vm.luay.LuayLibraryFactory;
-import luay.vm.luay.LuaySimpleLibraryFactory;
+import luay.lib.LuayLibraryFactory;
+import luay.lib.LuaySimpleLibraryFactory;
 
 /**
  * Subclass of {@link LibFunction} which implements the luay.main.lua standard package and
@@ -411,7 +409,7 @@ public class PackageLib extends TwoArgFunction {
 		{
 			String name = args.checkjstring(1);
 			try {
-				LuaValue _lib = LuayLibraryFactory.load(name);
+				LuaValue _lib = (LuaValue) LuayLibraryFactory.load(name);
 				if(_lib==null)
 				{
 					LuaValue _jlib = LuaySimpleLibraryFactory.load(name);
