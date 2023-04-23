@@ -1,4 +1,4 @@
-package luay.vm.luay;
+package luay.lib;
 
 import luay.vm.*;
 

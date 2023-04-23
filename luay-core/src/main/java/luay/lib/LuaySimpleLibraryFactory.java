@@ -1,6 +1,6 @@
-package luay.vm.luay;
+package luay.lib;
 
-import luay.vm.LuaFunction;
+import luay.vm.LuaValue;
 
 import java.util.Iterator;
 import java.util.ServiceLoader;
@@ -10,7 +10,7 @@ public interface LuaySimpleLibraryFactory
     String getName();
     Object getInstance();
 
-    public static LuaFunction load(String _name)
+    public static LuaValue load(String _name)
     {
         ServiceLoader<LuaySimpleLibraryFactory> _ldr = ServiceLoader.load(LuaySimpleLibraryFactory.class);
         Iterator<LuaySimpleLibraryFactory> _it =  _ldr.iterator();

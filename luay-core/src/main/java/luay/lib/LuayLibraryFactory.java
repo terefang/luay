@@ -1,4 +1,4 @@
-package luay.vm.luay;
+package luay.lib;
 
 import java.util.Iterator;
 import java.util.ServiceLoader;
@@ -6,9 +6,9 @@ import java.util.ServiceLoader;
 public interface LuayLibraryFactory
 {
     String getName();
-    AbstractLibrary getInstance();
+    LuayLibrary getInstance();
 
-    public static AbstractLibrary load(String _name)
+    public static LuayLibrary load(String _name)
     {
         ServiceLoader<LuayLibraryFactory> _ldr = ServiceLoader.load(LuayLibraryFactory.class);
         Iterator<LuayLibraryFactory> _it =  _ldr.iterator();

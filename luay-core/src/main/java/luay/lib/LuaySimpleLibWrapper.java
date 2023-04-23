@@ -1,4 +1,4 @@
-package luay.vm.luay;
+package luay.lib;
 
 import lombok.SneakyThrows;
 import luay.vm.LuaFunction;
