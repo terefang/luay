@@ -145,4 +145,5 @@ public class LuaNil extends LuaValue {
 
 	@Override
 	public LuaValue optvalue(LuaValue defval) { return defval; }
+
 }

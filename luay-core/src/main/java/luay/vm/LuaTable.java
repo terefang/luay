@@ -21,8 +21,6 @@
  ******************************************************************************/
 package luay.vm;
 
-import luay.vm.luay.LuayStringifierFunction;
-
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Vector;

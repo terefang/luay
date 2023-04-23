@@ -1,7 +1,6 @@
 package luay.vm;
 
 import luay.vm.lib.java.CoerceJavaToLua;
-import luay.vm.luay.LuayStringifierFunction;
 
 import java.util.ArrayList;
 import java.util.Vector;
