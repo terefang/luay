@@ -13,13 +13,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LuayContext {
-    private final LuayGlobals globals;
+    private final LuayGlobal globals;
 
     Map<String,Object> top = new HashMap<>();
     private Prototype script;
     private String scriptName;
 
-    public LuayContext(LuayGlobals _globals) {
+    public LuayContext(LuayGlobal _globals) {
         this.globals = _globals;
     }
 
@@ -77,22 +77,35 @@ public class LuayContext {
 
     public Object execute(Reader _reader, String _name, boolean _useLocal)
     {
-        LuaTable _env = this.globals;
-        if(_useLocal)
+        try
         {
-            _env = this.globals.cloneEnv();
-        }
+            LuaTable _env = this.globals;
+            if(_useLocal)
+            {
+                _env = this.globals.cloneEnv();
+            }
 
-        for(Map.Entry<String, Object> _entry : top.entrySet())
+            LuayGlobal.setContext(this.globals);
+            LuayGlobal.setEnv(_env);
+
+            for(Map.Entry<String, Object> _entry : top.entrySet())
+            {
+                _env.set(_entry.getKey(), CoerceJavaToLua.coerce(_entry.getValue()));
+            }
+
+            LuaValue _chunk = this.globals.load(_reader, _name, _env);
+
+            LuaValue _ret = _chunk.call();
+
+            if(_ret.isnil()) return null;
+
+            return CoerceLuaToJava.coerce(_ret, Object.class);
+        }
+        finally
         {
-            _env.set(_entry.getKey(), CoerceJavaToLua.coerce(_entry.getValue()));
+            LuayGlobal.removeEnv();
+            LuayGlobal.removeContext();
         }
-
-        LuaValue _chunk = this.globals.load(_reader, _name, _env);
-
-        LuaValue _ret = _chunk.call();
-
-        return CoerceLuaToJava.coerce(_ret, Object.class);
     }
 
     @SneakyThrows
@@ -160,10 +173,23 @@ public class LuayContext {
     @SneakyThrows
     public Object runScript(LuaTable _env)
     {
-        LuaValue _chunk = this.globals.loader.load(this.script, this.scriptName, _env);
+        try
+        {
+            LuayGlobal.setContext(this.globals);
+            LuayGlobal.setEnv(_env);
 
-        LuaValue _ret = _chunk.call();
+            LuaValue _chunk = this.globals.loader.load(this.script, this.scriptName, _env);
 
-        return CoerceLuaToJava.coerce(_ret, Object.class);
+            LuaValue _ret = _chunk.call();
+
+            if(_ret.isnil()) return null;
+
+            return CoerceLuaToJava.coerce(_ret, Object.class);
+        }
+        finally
+        {
+            LuayGlobal.removeEnv();
+            LuayGlobal.removeContext();
+        }
     }
 }
