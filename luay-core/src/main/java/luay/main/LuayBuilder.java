@@ -6,8 +6,8 @@ import luay.vm.compiler.LuaC;
 import luay.vm.lib.*;
 import luay.vm.lib.java.*;
 import luay.vm.luajc.LuaJC;
-import luay.vm.luay.LuaySimpleLibraryFactory;
-import luay.vm.luay.LuayLibraryFactory;
+import luay.lib.LuaySimpleLibraryFactory;
+import luay.lib.LuayLibraryFactory;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -36,7 +36,7 @@ public class LuayBuilder
 
     public LuayContext build()
     {
-        LuayGlobals _globals = new LuayGlobals();
+        LuayGlobal _globals = new LuayGlobal();
         _globals.load(new BaseLib());
 
         PackageLib _pkglib = new PackageLib();
@@ -87,16 +87,11 @@ public class LuayBuilder
 
     public LuayBuilder namedLibrary(String _lib)
     {
-        LuaValue _val = LuayLibraryFactory.load(_lib);
+        LuaValue _val = (LuaValue) LuayLibraryFactory.load(_lib);
 
         if(_val == null)
         {
-            Object _jval = LuaySimpleLibraryFactory.load(_lib);
-
-            if(_jval != null)
-            {
-                _val = CoerceJavaToLua.coerce(_jval);
-            }
+            _val = LuaySimpleLibraryFactory.load(_lib);
         }
 
         if(_val != null) this.extLibs.add(_val);
