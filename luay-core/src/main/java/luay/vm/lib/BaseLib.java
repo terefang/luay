@@ -25,9 +25,8 @@ import java.io.*;
 
 import luay.vm.*;
 
-import luay.vm.ast.Stat;
 import luay.vm.lib.java.JsePlatform;
-import luay.vm.luay.LuayStringifierFunction;
+import luay.lib.LuayStringifierFunction;
 
 /**
  * Subclass of {@link LibFunction} which implements the luay.main.lua basic library
