@@ -21,12 +21,11 @@
 ******************************************************************************/
 package luay.vm.lib;
 
-import luay.vm.LuaFunction;
 import luay.vm.LuaTable;
 import luay.vm.LuaValue;
 import luay.vm.Varargs;
 import luay.vm.lib.java.JsePlatform;
-import sun.util.resources.et.CalendarData_et;
+
 
 /**
  * Subclass of {@link LibFunction} which implements the luay.main.lua standard
