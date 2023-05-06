@@ -46,3 +46,5 @@ print('stringify',stringify(_tbl,'json'))
 print('stringify',stringify(___op))
 print('stringify',stringify(_lst))
 
+local _c = 'A'
+print(_c:len())

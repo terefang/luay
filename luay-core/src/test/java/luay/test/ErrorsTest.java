@@ -80,4 +80,9 @@ class ErrorsTest extends PlatformTestCase {
 	@Test
 	void testTableLibArgs() { runTest("tablelibargs"); }
 
+	public static void main(String[] args) {
+		ErrorsTest _ht = new ErrorsTest();
+		_ht.setUp();
+		_ht.testBaseLibArgs();
+	}
 }

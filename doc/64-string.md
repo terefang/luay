@@ -55,4 +55,27 @@ Refer: http://www.lua.org/manual/5.2/manual.html#6.4.1
 
 Refer: http://www.lua.org/manual/5.3/manual.html#6.4.2
 
+### Luay Extensions
+
+*   `string.concat(v1[,...,vN]) -> string`
+*   `string.concat(table) -> string`
+  
+*   `string.split(sep, string) -> list`
+*   `string.split(sep, string, limit) -> list` \
+    Java String.split
+   
+*   `string.explode(string) -> list`
+*   `string.explode(sep, string) -> list`
+*   `string.explode(sep, string, limit) -> list` \
+    Java StringTokenizer, default all whitespace
+  
+*   `string.implode(sep,v1[,...,vN]) -> string`
+*   `string.implode(sep,table) -> string`
+  
+*   `string.mformat(fmt, v1[,...,vN]) -> string` \
+    Java MessageFormatter
+
+*   `string.sformat(fmt, v1[,...,vN]) -> string` \
+    Java String.format
+
 \pagebreak

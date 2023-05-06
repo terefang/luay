@@ -8,11 +8,6 @@ import luay.vm.lib.PackageLib;
 
 public class LuayGlobal extends Globals
 {
-    public LuaTable cloneEnv()
-    {
-        return new LuaTable(this);
-    }
-
     public PackageLib getPackageLib()
     {
         return this.package_;
@@ -20,14 +15,6 @@ public class LuayGlobal extends Globals
 
     public void setIsLoaded(String name, LuaTable value) {
         getPackageLib().setIsLoaded(name, value);
-    }
-
-    public boolean isLoaded(String name) {
-        return getPackageLib().isLoaded(name);
-    }
-
-    public LuaValue getLoaded(String name) {
-        return getPackageLib().getLoaded(name);
     }
 
     static ThreadLocal<LuayGlobal> thlGlobals = new ThreadLocal();

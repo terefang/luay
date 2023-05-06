@@ -11,12 +11,16 @@
     <modules>
         <module>luay-core</module>
         <module>luay-ext</module>
+        <module>luay-ext-dao</module>
+        <module>luay-ext-okhttp</module>
+        <module>luay-ext-snmp</module>
     </modules>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version.jmelange>2023.4.237</version.jmelange>
     </properties>
 
     <build>
@@ -26,50 +30,7 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
                 <inherited>false</inherited>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.redline-rpm</groupId>
-                        <artifactId>redline</artifactId>
-                        <version>1.2.9</version>
-                        <classifier>jar-with-dependencies</classifier>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.ant</groupId>
-                        <artifactId>ant-compress</artifactId>
-                        <version>1.5</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.github.terefang</groupId>
-                        <artifactId>ant-archive-plus</artifactId>
-                        <version>1.5.2</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>ant-contrib</groupId>
-                        <artifactId>ant-contrib</artifactId>
-                        <version>1.0b3</version>
-                    </dependency>
-                    <!-- https://mvnrepository.com/artifact/org.apache.ant/ant-apache-bsf -->
-                    <dependency>
-                        <groupId>org.apache.ant</groupId>
-                        <artifactId>ant-apache-bsf</artifactId>
-                        <version>1.10.12</version>
-                    </dependency>
-
-                    <!-- https://mvnrepository.com/artifact/org.beanshell/bsh -->
-                    <dependency>
-                        <groupId>org.beanshell</groupId>
-                        <artifactId>bsh</artifactId>
-                        <version>2.0b5</version>
-                    </dependency>
-                    <!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
-                    <dependency>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                        <version>1.2</version>
-                    </dependency>
-
-                </dependencies>
-                <executions>
+                              <executions>
                     <execution>
                         <id>ant</id>
                         <phase>package</phase>
@@ -77,10 +38,8 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <target xmlns:if="ant:if" xmlns:unless="ant:unless">
-                                <taskdef resource="net/sf/antcontrib/antlib.xml"/>
-
-                                <exec executable="xbin/build-docs.sh" resolveexecutable="true" />
+                            <target>
+                               <exec executable="xbin/build-docs.sh" resolveexecutable="true" />
                             </target>
                         </configuration>
                     </execution>

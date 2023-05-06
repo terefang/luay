@@ -1,13 +1,13 @@
 package luay.test.luay.java;
 
 
-import luay.test.luay._luayTestCase;
+import luay.test.luay.luayTestCase;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Vector;
 
-public class ListTest extends _luayTestCase
+public class ListTest extends luayTestCase
 {
     @Test
     void testMain()

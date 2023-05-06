@@ -22,7 +22,6 @@
 package luay.vm;
 
 import luay.vm.lib.java.JsePlatform;
-import luay.vm.luay.LuayStringifierFunction;
 
 /**
  * Base class for all concrete luay.main.lua type values.
@@ -3610,7 +3609,12 @@ abstract public class LuaValue extends Varargs {
 	 * @param step  the numberical step size to use.
 	 * @return true if limit has not been reached, false otherwise.
 	 */
-	public boolean testfor_b(LuaValue limit, LuaValue step) { return step.gt_b(0)? lteq_b(limit): gteq_b(limit); }
+	public boolean testfor_b(LuaValue limit, LuaValue step) {
+		//this.checknumber();
+		//limit.checknumber();
+		//step.checknumber();
+		return step.gt_b(0)? lteq_b(limit): gteq_b(limit);
+	}
 
 	/**
 	 * Convert this value to a string if it is a {@link LuaString} or

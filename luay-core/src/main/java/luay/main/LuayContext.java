@@ -9,6 +9,7 @@ import luay.vm.lib.java.CoerceLuaToJava;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,9 +24,18 @@ public class LuayContext {
         this.globals = _globals;
     }
 
+    public void setOutputStream(OutputStream _out)
+    {
+        globals.STDOUT=(_out!=null) ? new PrintStream(_out) : null;
+    }
+
     public void set(String key, Object val)
     {
         this.top.put(key, val);
+    }
+
+    public void setAll(Map<String, Object> _map) {
+        this.top.putAll(_map);
     }
 
     public void unset(String key)
@@ -39,52 +49,26 @@ public class LuayContext {
     }
 
     @SneakyThrows
-    public Object execute(File _file, boolean _useLocal)
-    {
-        return execute(new FileReader(_file), _file.getName(), _useLocal);
-    }
-
-    @SneakyThrows
     public Object execute(File _file)
     {
         return execute(new FileReader(_file), _file.getName());
     }
 
-    public Object execute(InputStream _stream, String _name, boolean _useLocal)
-    {
-        return execute(new InputStreamReader(_stream, StandardCharsets.UTF_8), _name, _useLocal);
-    }
-
     public Object execute(InputStream _stream, String _name)
     {
-        return execute(_stream, _name, false);
+        return execute(new InputStreamReader(_stream, StandardCharsets.UTF_8), _name);
     }
 
     public Object execute(String _script, String _name)
     {
-        return execute(_script, _name, false);
-    }
-
-    public Object execute(String _script, String _name, boolean _useLocal)
-    {
-        return execute(new StringReader(_script), _name, _useLocal);
+        return execute(new StringReader(_script), _name);
     }
 
     public Object execute(Reader _reader, String _name)
     {
-        return execute(_reader, _name, false);
-    }
-
-    public Object execute(Reader _reader, String _name, boolean _useLocal)
-    {
         try
         {
             LuaTable _env = this.globals;
-            if(_useLocal)
-            {
-                _env = this.globals.cloneEnv();
-            }
-
             LuayGlobal.setContext(this.globals);
             LuayGlobal.setEnv(_env);
 
@@ -132,42 +116,40 @@ public class LuayContext {
     }
 
     @SneakyThrows
-    public Object runScript() { return runScript(false); }
+    public Object runScript() { return runScript(Collections.emptyMap()); }
+
 
     @SneakyThrows
-    public Object runScript(boolean _useLocal) {
-        LuaTable _env = this.globals;
-        if (_useLocal)
-        {
-            _env = this.globals.cloneEnv();
-        }
-
-        for(Map.Entry<String, Object> _entry : top.entrySet())
-        {
-            _env.set(_entry.getKey(), CoerceJavaToLua.coerce(_entry.getValue()));
-        }
-
-        return runScript(_env);
-    }
-
-    @SneakyThrows
-    public Object runScript(Map<String,Object> _top) { return runScript(_top, false); }
-
-    @SneakyThrows
-    public Object runScript(Map<String,Object> _top, boolean _useLocal)
+    public Object runScript(Map<String,Object> _top)
     {
         LuaTable _env = this.globals;
-        if (_useLocal)
-        {
-            _env = this.globals.cloneEnv();
-        }
 
-        for(Map.Entry<String, Object> _entry : _top.entrySet())
+        try
         {
-            _env.set(_entry.getKey(), CoerceJavaToLua.coerce(_entry.getValue()));
-        }
+            for(Map.Entry<String, Object> _entry : this.top.entrySet())
+            {
+                _env.set(_entry.getKey(), CoerceJavaToLua.coerce(_entry.getValue()));
+            }
 
-        return runScript(_env);
+            for(Map.Entry<String, Object> _entry : _top.entrySet())
+            {
+                _env.set(_entry.getKey(), CoerceJavaToLua.coerce(_entry.getValue()));
+            }
+
+            return runScript(_env);
+        }
+        finally
+        {
+            for(Map.Entry<String, Object> _entry : _top.entrySet())
+            {
+                _env.set(_entry.getKey(), LuaValue.NIL);
+            }
+
+            for(Map.Entry<String, Object> _entry : this.top.entrySet())
+            {
+                _env.set(_entry.getKey(), LuaValue.NIL);
+            }
+        }
     }
 
     @SneakyThrows
@@ -192,4 +174,5 @@ public class LuayContext {
             LuayGlobal.removeContext();
         }
     }
+
 }

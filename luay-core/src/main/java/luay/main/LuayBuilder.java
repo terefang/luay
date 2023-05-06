@@ -176,4 +176,13 @@ public class LuayBuilder
         this.inputStream = inputStream;
         return this;
     }
+
+    public LuayBuilder searchPath(List<String> _path)
+    {
+        for(String _p : _path)
+        {
+            searchPath(_p);
+        }
+        return this;
+    }
 }

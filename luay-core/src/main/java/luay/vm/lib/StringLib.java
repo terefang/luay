@@ -23,9 +23,12 @@ package luay.vm.lib;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.StringTokenizer;
 
 import luay.vm.*;
 import luay.vm.compiler.DumpState;
+import luay.vm.lib.java.CoerceLuaToJava;
 import luay.vm.lib.java.JsePlatform;
 
 /**
@@ -34,7 +37,6 @@ import luay.vm.lib.java.JsePlatform;
  * <p>
  * Typically, this library is included as part of a call to either
  * {@link JsePlatform#standardGlobals()} or
- * {@link org.luaj.vm2.lib.jme.JmePlatform#standardGlobals()}
  *
  * <pre>
  * {
@@ -62,7 +64,6 @@ import luay.vm.lib.java.JsePlatform;
  *
  * @see LibFunction
  * @see JsePlatform
- * @see org.luaj.vm2.lib.jme.JmePlatform
  * @see <a href="http://www.lua.org/manual/5.2/manual.html#6.4">Lua 5.2 String
  *      Lib Reference</a>
  */
@@ -111,7 +112,15 @@ public class StringLib extends TwoArgFunction {
 		string.set("reverse", new reverse());
 		string.set("sub", new sub());
 		string.set("upper", new upper());
+
+		// luay extension
 		string.set("toutf8", new toutf8());
+		string.set("split", new _split());
+		string.set("explode", new _explode());
+		string.set("implode", new _implode());
+		string.set("concat", new _concat());
+		string.set("mformat", new _mformat());
+		string.set("sformat", new _sformat());
 
 		env.set("string", string);
 		if (!env.get("package").isnil())
@@ -1300,6 +1309,203 @@ public class StringLib extends TwoArgFunction {
 					cont++;
 			}
 			return -1;
+		}
+	}
+
+	static final class _split extends VarArgFunction {
+		@Override
+		public Varargs invoke(Varargs _args)
+		{
+			String[] _r = null;
+			String _sep = _args.checkjstring(1);
+			String _s = _args.checkjstring(2);
+			if(_args.narg()==2)
+			{
+				_r = _s.split(_sep);
+			}
+			else
+			if(_args.narg()==3)
+			{
+				int _limit = _args.checkint(3);
+				_r = _s.split(_sep, _limit);
+			}
+
+			LuaValue[] v = new LuaValue[_r.length];
+			for (int i=0; i<_r.length; i++)
+				v[i] = LuaString.valueOf(_r[i]);
+
+			return LuaTable.listOf(v);
+		}
+	}
+
+	static final class _explode extends VarArgFunction {
+		@Override
+		public Varargs invoke(Varargs _args)
+		{
+			String[] _r = null;
+			String _sep = _args.checkjstring(1);
+			if(_args.narg()==1)
+			{
+				_r = split(_sep, null, -1);
+			}
+			else
+			if(_args.narg()==2)
+			{
+				String _s = _args.checkjstring(2);
+				_r = split(_s, _sep, -1);
+			}
+			else
+			if(_args.narg()==3)
+			{
+				String _s = _args.checkjstring(2);
+				int _limit = _args.checkint(3);
+				_r = split(_s, _sep, _limit);
+			}
+
+			LuaValue[] v = new LuaValue[_r.length];
+			for (int i=0; i<_r.length; i++)
+				v[i] = LuaString.valueOf(_r[i]);
+
+			return LuaTable.listOf(v);
+		}
+
+		public static String[] split( String str, String separator, int max )
+		{
+			StringTokenizer tok;
+			if ( separator == null )
+			{
+				// Null separator means we're using StringTokenizer's default
+				// delimiter, which comprises all whitespace characters.
+				tok = new StringTokenizer( str );
+			}
+			else
+			{
+				tok = new StringTokenizer( str, separator );
+			}
+
+			int listSize = tok.countTokens();
+			if ( ( max > 0 ) && ( listSize > max ) )
+			{
+				listSize = max;
+			}
+
+			String[] list = new String[listSize];
+			int i = 0;
+			int lastTokenBegin;
+			int lastTokenEnd = 0;
+			while ( tok.hasMoreTokens() )
+			{
+				if ( ( max > 0 ) && ( i == listSize - 1 ) )
+				{
+					// In the situation where we hit the max yet have
+					// tokens left over in our input, the last list
+					// element gets all remaining text.
+					String endToken = tok.nextToken();
+					lastTokenBegin = str.indexOf( endToken, lastTokenEnd );
+					list[i] = str.substring( lastTokenBegin );
+					break;
+				}
+				else
+				{
+					list[i] = tok.nextToken();
+					lastTokenBegin = str.indexOf( list[i], lastTokenEnd );
+					lastTokenEnd = lastTokenBegin + list[i].length();
+				}
+				i++;
+			}
+			return list;
+		}
+	}
+
+	static final class _implode extends VarArgFunction {
+		@Override
+		public Varargs invoke(Varargs _args)
+		{
+			StringBuilder _sb = new StringBuilder();
+			String _sep = _args.checkjstring(1);
+
+			if(_args.narg()==2)
+			{
+				LuaTable _t = _args.checktable(2);
+
+				String _s = _t.get(1).tojstring();
+				_sb.append(_s);
+
+				for (int i = 2; i <= _t.length(); i++) {
+					_s = _t.get(i).tojstring();
+					_sb.append(_sep);
+					_sb.append(_s);
+				}
+			}
+			else
+			{
+				String _s = _args.checkjstring(2);
+				_sb.append(_s);
+
+				for (int i = 3; i <= _args.narg(); i++) {
+					_s = _args.checkjstring(i);
+					_sb.append(_sep);
+					_sb.append(_s);
+				}
+			}
+			return LuaString.valueOf(_sb.toString());
+		}
+	}
+
+	static final class _concat extends VarArgFunction {
+		@Override
+		public Varargs invoke(Varargs _args)
+		{
+			StringBuilder _sb = new StringBuilder();
+			if(_args.narg()==1)
+			{
+				LuaTable _t = _args.checktable(1);
+
+				for (int i = 1; i <= _t.length(); i++) {
+					String _s = _t.get(i).tojstring();
+					_sb.append(_s);
+				}
+			}
+			else
+			{
+				for (int i = 1; i <= _args.narg(); i++) {
+					String _s = _args.tojstring(i);
+					_sb.append(_s);
+				}
+			}
+			return LuaString.valueOf(_sb.toString());
+		}
+	}
+
+	static final class _mformat extends VarArgFunction {
+		@Override
+		public Varargs invoke(Varargs _args)
+		{
+			String _pattern = _args.checkjstring(1);
+			Object[] _objs = new Object[_args.narg()-1];
+
+			for (int i = 2; i <= _args.narg(); i++)
+			{
+				_objs[i-2] = CoerceLuaToJava.convert(_args.arg(i));
+			}
+
+			return LuaString.valueOf(MessageFormat.format(_pattern, _objs));
+		}
+	}
+
+	static final class _sformat extends VarArgFunction {
+		@Override
+		public Varargs invoke(Varargs _args)
+		{
+			String _pattern = _args.checkjstring(1);
+			Object[] _objs = new Object[_args.narg()-1];
+
+			for (int i = 2; i <= _args.narg(); i++)
+			{
+				_objs[i-2] = CoerceLuaToJava.convert(_args.arg(i));
+			}
+
+			return LuaString.valueOf(String.format(_pattern, _objs));
 		}
 	}
 }

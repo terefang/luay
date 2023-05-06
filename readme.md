@@ -17,19 +17,19 @@ see docs
 - [ ] evaluate https://github.com/aiq/luazdf, what to implement
     - [ ] algo/algo
     - [ ] algo/luhn/luhn
-    - [ ] arr/appendall/appendall
-    - [ ] arr/append/append
+    - [x] arr/appendall/appendall
+    - [x] arr/append/append
     - [ ] arr/arr
-    - [ ] arr/chunk/chunk
-    - [ ] arr/collectk/collectk
-    - [ ] arr/collectv/collectv
-    - [ ] arr/count/count
-    - [ ] arr/cutarr/cutarr
-    - [ ] arr/difference/difference
-    - [ ] arr/findif/findif
+    - [x] arr/chunk/chunk
+    - [x] arr/collectk/collectk
+    - [x] arr/collectv/collectv
+    - [x] arr/count/count
+    - [x] arr/cutarr/cutarr
+    - [x] arr/difference/difference
+    - [x] arr/findif/findif
     - [ ] arr/flatten/flatten
     - [ ] arr/group/group
-    - [ ] arr/indexof/indexof
+    - [x] arr/indexof/indexof
     - [ ] arr/insertall/insertall
     - [ ] arr/intersection/intersection
     - [ ] arr/last/last
@@ -280,40 +280,37 @@ see docs
 - [ ] implement lua 5.4 std modules and changes ?
 - [ ] evaluate commonly packaged modules, what to implement
     - [ ] https://github.com/Tieske/binaryheap.lua
-    - [ ] lua-alt-getopt-0.8.0-1.el8.noarch.rpm	Argument processing module for Lua
-    - [ ] lua-basexx-0.4.0-2.el8.noarch.rpm	BaseXX encoding and decoding library for Lua
-    - [ ] lua-binaryheap-0.4-1.el8.noarch.rpm	Binary heap implementation for Lua
-    - [ ] lua-bit32-5.3.5.1-1.el8.x86_64.rpm	Lua bit manipulation library
-    - [ ] lua5.1-bitop-1.0.2-5.el8.x86_64.rpm	C extension module for Lua 5.1 which adds bit-wise operations on numbers
-    - [ ] lua-compat53-0.7-3.el7.x86_64.rpm	Compatibility module providing Lua-5.3-style APIs for Lua 5.1
-    - [ ] lua-cqueues-20190813-3.el7.x86_64.rpm	Stackable Continuation Queues for the Lua Programming Language
-    - [ ] lua-cqueues-doc-20190813-3.el7.noarch.rpm	Documentation for the Stackable Continuation Queues library
-    - [ ] lua-cyrussasl-1.1.0-1.el7.x86_64.rpm	Cyrus SASL library for Lua
-    - [ ] lua-cjson-2.1.0.12-1.el8.x86_64.rpm	Lua Extension: JSON Encoding/Decoding
-    - [ ] lua-dbi-0.7.2-1.el7.x86_64.rpm	Database interface library for Lua
-    - [ ] lua-event-0.4.6-1.el7.x86_64.rpm	This is a binding of libevent to Lua
-    - [ ] lua-expat-1.4.1-1.el7.x86_64.rpm	SAX XML parser based on the Expat library
-    - [ ] lua-fifo-0.2-1.el7.noarch.rpm	FIFO library for Lua
-    - [ ] lua-filesystem-1.6.2-2.el7.x86_64.rpm	File System Library for the Lua Programming Language
-    - [ ] lua-fun-0.1.3-1.el7.noarch.rpm	Functional programming library for Lua
-    - [ ] lua-http-0.3-5.el7.noarch.rpm	HTTP library for Lua
-    - [ ] lua-http-doc-0.3-5.el7.noarch.rpm	Documentation for HTTP library for Lua
-    - [ ] lua-json-1.3.2-2.el7.noarch.rpm	JSON Parser/Constructor for Lua
-    - [ ] lua-ldap-1.1.0-3.el7.x86_64.rpm	LDAP client library for Lua, using OpenLDAP
-    - [ ] lua-ldap-compat-1.1.0-20.el8.x86_64.rpm	LDAP client library for Lua 5.1, using OpenLDAP
-    - [ ] lua-lpeg-0.12-1.el7.x86_64.rpm	Parsing Expression Grammars for Lua
-    - [ ] lua-lpeg-patterns-0.5-1.el7.noarch.rpm	A collection of LPEG patterns
-    - [ ] lua-luaossl-20190731-1.el7.x86_64.rpm	Most comprehensive OpenSSL module in the Lua universe
-    - [ ] lua-luaossl-doc-20190731-1.el7.noarch.rpm	Documentation for OpenSSL Lua module
-    - [ ] lua-lunit-0.5-5.el7.noarch.rpm	Unit testing framework for Lua
-    - [ ] lua-md5-1.1.2-1.el7.x86_64.rpm	Cryptographic Library for MD5 hashes for Lua
-    - [ ] lua-mmdb-0.2-1.el7.noarch.rpm	MaxMind database parser for Lua
-    - [ ] lua-mpack-1.0.4-2.el7.x86_64.rpm	Implementation of MessagePack for Lua
-    - [ ] lua-posix-32-2.el7.x86_64.rpm	A POSIX library for Lua
-    - [ ] lua-prelude-5.2.0-2.el7.x86_64.rpm	Lua bindings for prelude
-    - [ ] lua-psl-0.3-2.el7.x86_64.rpm	Lua bindings to Public Suffix List library
-    - [ ] lua-readline-3.2-1.el7.x86_64.rpm	Lua interface to the readline and history libraries
-    - [ ] lua-sec-1.2.0-1.el7.x86_64.rpm	Lua binding for OpenSSL library
-    - [ ] lua-socket-3.1.0-1.el7.x86_64.rpm	Network support for the Lua language
-    - [ ] lua-term-0.03-3.el7.x86_64.rpm	Terminal functions for Lua
-    - [ ] lua-unbound-1.0.0-1.el7.x86_64.rpm	Binding to libunbound for Lua
+    - [ ] lua-alt-getopt-0.8.0-1	Argument processing module for Lua
+    - [ ] lua-basexx-0.4.0-2	BaseXX encoding and decoding library for Lua
+    - [ ] lua-binaryheap-0.4-1	Binary heap implementation for Lua
+    - [ ] lua-bit32-5.3.5.1-1	Lua bit manipulation library
+    - [ ] lua5.1-bitop-1.0.2-5	C extension module for Lua 5.1 which adds bit-wise operations on numbers
+    - [ ] lua-compat53-0.7-3	Compatibility module providing Lua-5.3-style APIs for Lua 5.1
+    - [ ] lua-cqueues-20190813-3	Stackable Continuation Queues for the Lua Programming Language
+    - [ ] lua-cyrussasl-1.1.0-1	Cyrus SASL library for Lua
+    - [ ] lua-cjson-2.1.0.12-1	Lua Extension: JSON Encoding/Decoding
+    - [ ] lua-dbi-0.7.2-1	Database interface library for Lua
+    - [ ] lua-event-0.4.6-1	This is a binding of libevent to Lua
+    - [ ] lua-expat-1.4.1-1	SAX XML parser based on the Expat library
+    - [ ] lua-fifo-0.2-1	FIFO library for Lua
+    - [ ] lua-filesystem-1.6.2-2	File System Library for the Lua Programming Language
+    - [ ] lua-fun-0.1.3-1	Functional programming library for Lua
+    - [ ] lua-http-0.3-5	HTTP library for Lua
+    - [ ] lua-json-1.3.2-2	JSON Parser/Constructor for Lua
+    - [ ] lua-ldap-1.1.0-3	LDAP client library for Lua, using OpenLDAP
+    - [ ] lua-ldap-compat-1.1.0-20	LDAP client library for Lua 5.1, using OpenLDAP
+    - [ ] lua-lpeg-0.12-1	Parsing Expression Grammars for Lua
+    - [ ] lua-lpeg-patterns-0.5-1	A collection of LPEG patterns
+    - [ ] lua-luaossl-20190731-1	Most comprehensive OpenSSL module in the Lua universe
+    - [ ] lua-lunit-0.5-5	Unit testing framework for Lua
+    - [ ] lua-md5-1.1.2-1	Cryptographic Library for MD5 hashes for Lua
+    - [ ] lua-mmdb-0.2-1	MaxMind database parser for Lua
+    - [ ] lua-mpack-1.0.4-2	Implementation of MessagePack for Lua
+    - [ ] lua-posix-32-2	A POSIX library for Lua
+    - [ ] lua-prelude-5.2.0-2	Lua bindings for prelude
+    - [ ] lua-psl-0.3-2	Lua bindings to Public Suffix List library
+    - [ ] lua-readline-3.2-1	Lua interface to the readline and history libraries
+    - [ ] lua-sec-1.2.0-1	Lua binding for OpenSSL library
+    - [ ] lua-socket-3.1.0-1	Network support for the Lua language
+    - [ ] lua-term-0.03-3	Terminal functions for Lua
+    - [ ] lua-unbound-1.0.0-1	Binding to libunbound for Lua

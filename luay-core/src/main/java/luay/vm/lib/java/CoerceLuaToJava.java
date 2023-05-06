@@ -427,4 +427,37 @@ public class CoerceLuaToJava {
 		COERCIONS.put(c, co);
 		return co;
 	}
+
+	public static Object convert(LuaValue _arg)
+	{
+		if(_arg.isstring())
+		{
+			return _arg.checkjstring();
+		}
+		else
+		if(_arg.isnumber() && _arg.checknumber().isint())
+		{
+			return _arg.checkint();
+		}
+		else
+		if(_arg.isnumber() && _arg.checknumber().islong())
+		{
+			return _arg.checklong();
+		}
+		else
+		if(_arg.isnumber() && _arg.checknumber().isboolean())
+		{
+			return _arg.checkboolean();
+		}
+		else
+		if(_arg.isnumber())
+		{
+			return _arg.checkdouble();
+		}
+		else
+		{
+			return _arg.tojstring();
+		}
+	}
+
 }

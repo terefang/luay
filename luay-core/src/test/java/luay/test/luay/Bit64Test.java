@@ -2,7 +2,7 @@ package luay.test.luay;
 
 import org.junit.jupiter.api.Test;
 
-public class Bit64Test extends _luayTestCase
+public class Bit64Test extends luayTestCase
 {
 
     @Test

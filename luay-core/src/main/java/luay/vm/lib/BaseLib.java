@@ -118,16 +118,14 @@ public class BaseLib extends TwoArgFunction implements ResourceFinder {
 		env.set("tostring", new tostring());
 		env.set("type", new type());
 		env.set("xpcall", new xpcall());
-
-		// --- luay extension
-		env.set("stringify", LuayStringifierFunction.INSTANCE);
-		// ---
 		next next;
 		env.set("next", next = new next());
 		env.set("pairs", new pairs(next));
 		env.set("ipairs", new ipairs());
 
 		// --- LUAY extensions
+		env.set("stringify", LuayStringifierFunction.INSTANCE);
+		env.set("printnl", new printnl(this));
 		env.set("printf", new printf());
 		return env;
 	}
@@ -305,6 +303,28 @@ public class BaseLib extends TwoArgFunction implements ResourceFinder {
 				globals.STDOUT.print(s.tojstring());
 			}
 			globals.STDOUT.print('\n');
+			globals.STDOUT.flush();
+			return NONE;
+		}
+	}
+
+	final class printnl extends VarArgFunction {
+		final BaseLib baselib;
+
+		printnl(BaseLib baselib) {
+			this.baselib = baselib;
+		}
+
+		@Override
+		public Varargs invoke(Varargs args) {
+			LuaValue tostring = globals.get("tostring");
+			for (int i = 1, n = args.narg(); i <= n; i++) {
+				if (i > 1)
+					globals.STDOUT.print('\t');
+				LuaString s = tostring.call(args.arg(i)).strvalue();
+				globals.STDOUT.print(s.tojstring());
+			}
+			globals.STDOUT.flush();
 			return NONE;
 		}
 	}
@@ -615,50 +635,55 @@ public class BaseLib extends TwoArgFunction implements ResourceFinder {
 		printf() {}
 
 		@Override
-		public Varargs invoke(Varargs args) {
-			LuaValue tostring = globals.get("tostring");
+		public Varargs invoke(Varargs args)
+		{
 			String _fmt = args.checkjstring(1);
-			Object[] _farg = new Object[args.narg()-1];
-
-			for (int i = 2, n = args.narg(); i <= n; i++)
-			{
-				if(args.arg(i).isnil())
-				{
-					_farg[i-2] = "nil";
-				}
-				else
-				if(args.arg(i).isboolean())
-				{
-					_farg[i-2] = args.checkboolean(i);
-				}
-				else
-				if(args.arg(i).islong())
-				{
-					_farg[i-2] = args.checklong(i);
-				}
-				else
-				if(args.arg(i).isinttype())
-				{
-					_farg[i-2] = args.checkint(i);
-				}
-				else
-				if(args.arg(i).isnumber())
-				{
-					_farg[i-2] = args.checkdouble(i);
-				}
-				else
-				if(args.arg(i).isstring())
-				{
-					_farg[i-2] = args.checkjstring(i);
-				}
-				else
-				{
-					_farg[i-2] = tostring.call(args.arg(i)).strvalue().tojstring();
-				}
-			}
-			globals.STDOUT.print(String.format(_fmt, _farg));
+			globals.STDOUT.print(String.format(_fmt, varArgsTo(args.subargs(2))));
 			return NONE;
 		}
+	}
+
+	public static Object[] varArgsTo(Varargs args)
+	{
+		Object[] _farg = new Object[args.narg()];
+
+		for (int i = 1, n = args.narg(); i <= n; i++)
+		{
+			if(args.arg(i).isnil())
+			{
+				_farg[i-1] = "nil";
+			}
+			else
+			if(args.arg(i).isboolean())
+			{
+				_farg[i-1] = args.checkboolean(i);
+			}
+			else
+			if(args.arg(i).islong())
+			{
+				_farg[i-1] = args.checklong(i);
+			}
+			else
+			if(args.arg(i).isinttype())
+			{
+				_farg[i-1] = args.checkint(i);
+			}
+			else
+			if(args.arg(i).isnumber())
+			{
+				_farg[i-1] = args.checkdouble(i);
+			}
+			else
+			if(args.arg(i).isstring())
+			{
+				_farg[i-1] = args.checkjstring(i);
+			}
+			else
+			{
+				_farg[i-1] = args.arg(i).tojstring();
+			}
+		}
+		return _farg;
 	}
 
 }

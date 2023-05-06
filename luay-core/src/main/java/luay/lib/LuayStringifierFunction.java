@@ -8,33 +8,33 @@ public class LuayStringifierFunction extends LuaFunction {
 
     @Override
     public LuaValue call(LuaValue arg) {
-        return _stringify(arg);
+        return _stringify(arg, true);
     }
 
     @Override
     public Varargs invoke(Varargs args) {
-        return _stringify_vararg(args);
+        return _stringify_vararg(args, true);
     }
 
-    public static LuaValue _stringify_string(LuaString _that)
+    public static LuaValue _stringify_string(LuaString _that, boolean _indicators)
     {
         StringBuilder _sb = new StringBuilder();
-        _sb.append("\"");
+        if(_indicators) _sb.append("\"");
         _sb.append(_that.tojstring());
-        _sb.append("\"");
+        if(_indicators) _sb.append("\"");
         return LuaString.valueOf(_sb.toString());
     }
 
-    public static LuaValue _stringify(LuaValue _that)
+    public static LuaValue _stringify(LuaValue _that, boolean _indicators)
     {
         if(_that instanceof LuaList)
         {
-            return _stringify_table((LuaList)_that, true);
+            return _stringify_table((LuaList)_that, _indicators, true);
         }
         else
         if(_that.istable())
         {
-            return _stringify_table((LuaTable)_that, false);
+            return _stringify_table((LuaTable)_that, _indicators, false);
         }
         else
         if(_that instanceof LuaInteger)
@@ -49,7 +49,7 @@ public class LuayStringifierFunction extends LuaFunction {
         else
         if(_that.isstring())
         {
-            return _stringify_string((LuaString) _that);
+            return _stringify_string((LuaString) _that, _indicators);
         }
         return LuaString.valueOf(_that.tojstring());
     }
@@ -64,7 +64,7 @@ public class LuayStringifierFunction extends LuaFunction {
         return LuaString.valueOf(_that.tojstring());
     }
 
-    public static Varargs _stringify_vararg(Varargs _that)
+    public static Varargs _stringify_vararg(Varargs _that, boolean _indicators)
     {
         // stringify was called with arguments
         if(_that.narg()==2 && "json".equalsIgnoreCase(_that.checkjstring(2)))
@@ -78,11 +78,11 @@ public class LuayStringifierFunction extends LuaFunction {
         }
         else // std
         {
-            return _stringify(_that.arg1());
+            return _stringify(_that.arg1(), _indicators);
         }
     }
 
-    public static LuaValue _stringify_table(LuaTable _that, boolean _forcelist)
+    public static LuaValue _stringify_table(LuaTable _that, boolean _indicators, boolean _forcelist)
     {
         if(_forcelist || _that.isarray())
         {
@@ -93,7 +93,7 @@ public class LuayStringifierFunction extends LuaFunction {
             for(int _i=0; _i<_len; _i++)
             {
                 if(!_first) _sb.append(", ");
-                _sb.append(_stringify(_that.get(_i+1)).tojstring());
+                _sb.append(_stringify(_that.get(_i+1), _indicators).tojstring());
                 _first=false;
             }
             _sb.append(" ]");
@@ -107,9 +107,9 @@ public class LuayStringifierFunction extends LuaFunction {
             for(LuaValue _i : _that.keys())
             {
                 if(!_first) _sb.append(", ");
-                _sb.append(_stringify(_i).tojstring());
+                _sb.append(_stringify(_i, _indicators).tojstring());
                 _sb.append(" -> ");
-                _sb.append(_stringify(_that.get(_i)).tojstring());
+                _sb.append(_stringify(_that.get(_i), _indicators).tojstring());
                 _first=false;
             }
             _sb.append(" }");
@@ -192,12 +192,12 @@ public class LuayStringifierFunction extends LuaFunction {
         else
         if(_that instanceof LuaInteger)
         {
-            return _stringify((LuaInteger)_that);
+            return _stringify((LuaInteger)_that, false);
         }
         else
         if(_that instanceof LuaNumber)
         {
-            return _stringify((LuaNumber)_that);
+            return _stringify((LuaNumber)_that, false);
         }
         else
         if(_that.isstring())
@@ -285,12 +285,12 @@ public class LuayStringifierFunction extends LuaFunction {
         else
         if(_that instanceof LuaInteger)
         {
-            return _stringify((LuaInteger)_that);
+            return _stringify((LuaInteger)_that, false);
         }
         else
         if(_that instanceof LuaNumber)
         {
-            return _stringify((LuaNumber)_that);
+            return _stringify((LuaNumber)_that, false);
         }
         else
         if(_that.isstring())

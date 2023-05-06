@@ -410,6 +410,14 @@ public class LuaTable extends LuaValue implements Metatable {
 		return v.isnil() ? NONE : v;
 	}
 
+	public LuaValue removeLast() {
+		return remove(length());
+	}
+
+	public LuaValue removeFirst() {
+		return remove(1);
+	}
+
 	/**
 	 * Insert an element at a position in a list-table
 	 *
@@ -549,6 +557,11 @@ public class LuaTable extends LuaValue implements Metatable {
 
 		// nothing found, push nil, return nil.
 		return NIL;
+	}
+
+	public LuaValue last()
+	{
+		return get(length());
 	}
 
 	/**

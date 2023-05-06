@@ -1,7 +1,5 @@
 -- _var comes from java { 1 = 0, ..., 256 = ff }
 
-local _string = require('string')
-
 for _i,_x in pairs(_var) do
     assert(_i==_x);
 end

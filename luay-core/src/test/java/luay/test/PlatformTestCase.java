@@ -50,13 +50,7 @@ abstract class PlatformTestCase extends ResourcesTestCase {
 	private PlatformType platform;
 
 	private void initGlobals() {
-		switch (platform) {
-		default:
-		case JSE:
-		case LUAJIT:
-			globals = JsePlatform.debugGlobals();
-			break;
-		}
+		globals = JsePlatform.debugGlobals();
 	}
 
 	@BeforeEach

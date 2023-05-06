@@ -21,6 +21,7 @@
 ******************************************************************************/
 package luay.vm.lib;
 
+import luay.vm.LuaString;
 import luay.vm.LuaTable;
 import luay.vm.LuaValue;
 import luay.vm.Varargs;
@@ -86,6 +87,7 @@ public class TableLib extends TwoArgFunction {
 		table.set("remove", new remove());
 		table.set("sort", new sort());
 		table.set("unpack", new unpack());
+		table.set("optget", new _optget());
 		env.set("table", table);
 		if (!env.get("package").isnil())
 			env.get("package").get("loaded").set("table", table);
@@ -182,6 +184,19 @@ public class TableLib extends TwoArgFunction {
 			// do not waste resource for calc rawlen if arg3 is not nil
 			int len = args.arg(3).isnil()? t.length(): 0;
 			return t.unpack(args.optint(2, 1), args.optint(3, len));
+		}
+	}
+
+	// optget(table, key, opt) -> value
+	static class _optget extends VarArgFunction {
+		@Override
+		public Varargs invoke(Varargs args) {
+			LuaTable _t = args.checktable(1);
+			LuaValue _key = args.checkvalue(2);
+			LuaValue _opt = args.checkvalue(3);
+			LuaValue _ret = _t.get(_key);
+			if(_ret.isnil()) return _opt;
+			return _ret;
 		}
 	}
 

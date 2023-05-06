@@ -6,7 +6,7 @@ bDIR=$(dirname $0)
 bDIR=$(cd $bDIR && pwd)
 
 #OPTS="-DskipTests=true -DproxySet=true -DproxyHost=127.0.0.1 -DproxyPort=3128 -Dhttps.nonProxyHosts=127.0.0.1"
-OPTS="-DskipTests=true"
+#OPTS="-DskipTests=true"
 
 while test ! -z "$1" ; do
   case "$1" in
