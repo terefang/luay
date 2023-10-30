@@ -1,0 +1,5 @@
+package luaygui;
+
+public class Version {
+    public static final String _VERSION = "@VERSION@";
+}

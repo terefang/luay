@@ -48,6 +48,7 @@ public class HashLib extends AbstractLibrary implements LuayLibraryFactory
 				_oneArgFunctionWrapper.from("from_b64", HashLib::_lua_fromb64),
 				_twoArgFunctionWrapper.from("hash", HashLib::_lua_hash),
 				_twoArgFunctionWrapper.from("hash_hex", HashLib::_lua_hash_hex),
+				_varArgFunctionWrapper.from("random_string", HashLib::_lua_random_string),
 				_oneArgFunctionWrapper.from("md5", HashLib::_lua_md5),
 				_oneArgFunctionWrapper.from("sha1", HashLib::_lua_sha1),
 				_oneArgFunctionWrapper.from("sha256", HashLib::_lua_sha256),
@@ -55,6 +56,42 @@ public class HashLib extends AbstractLibrary implements LuayLibraryFactory
 				_oneArgFunctionWrapper.from("new_hash", HashLib::_lua_newhash),
 				_twoArgFunctionWrapper.from("new_mac", HashLib::_lua_newmac)
 		);
+	}
+
+	private static Varargs _lua_random_string(Varargs args)
+	{
+		String _hay = "oqjKJhmszCVcFlnEDaeIXkGZuORLTvwHpStPyWBixgNYMbUQrAdf";
+		String _hayext = "&1$/06+%2874*35.9";
+		if(args.narg()>1)
+		{
+			_hay = args.checkjstring(2);
+		}
+		if(args.narg()>2)
+		{
+			_hayext = args.checkjstring(3);
+		}
+		int _len = args.checkint(1);
+
+		StringBuilder _sb = new StringBuilder();
+		byte[] _salt = randomSalt(_len);
+		int _last = -1;
+		int _idx = 0;
+		for(int _i=0; _i<_len; _i++)
+		{
+			if((_i>0) && (_hayext.length()>0) && ((((_salt[0]&0xff)+_i)%5) == 0))
+			{
+				_idx =(_salt[_i]&0xff)%_hayext.length();
+				_sb.append((char)_hayext.charAt(_idx));
+			}
+			else
+			{
+				_idx =(_salt[_i]&0xff)%_hay.length();
+				if(_idx == _last) _idx = (_hay.length()+_idx-1)%_hay.length();
+				_sb.append((char)_hay.charAt(_idx));
+				_last = _idx;
+			}
+		}
+		return LuaString.valueOf(_sb.toString());
 	}
 
 	private static LuaValue _lua_hash(LuaValue arg1, LuaValue arg2) {

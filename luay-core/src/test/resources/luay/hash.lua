@@ -35,3 +35,12 @@ local _mh = _hash.new_mac('HMACMD5', 's3cr3t');
 _mh:update('this');
 _mh:update('hello','world');
 print('hmacmd5 hex =',_hash.to_hex(_mh:finish()))
+
+print('random string =', _hash.random_string(64))
+print('random string =', _hash.random_string(64,"ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+print('random string =', _hash.random_string(64,"PGHWCBADIRENVzmfkosljxyutq","0123456789./+*"))
+print('random string =', _hash.random_string(64,"PGHWCBADIRENVzmfkosljxyutq",""))
+
+
+
+

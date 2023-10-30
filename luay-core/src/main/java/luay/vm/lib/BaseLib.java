@@ -23,6 +23,9 @@ package luay.vm.lib;
 
 import java.io.*;
 
+import luay.lib.ext.AbstractLibrary;
+import luay.lib.ext.zdf.ArrayLib;
+import luay.main.LuayHelper;
 import luay.vm.*;
 
 import luay.vm.lib.java.JsePlatform;
@@ -127,6 +130,10 @@ public class BaseLib extends TwoArgFunction implements ResourceFinder {
 		env.set("stringify", LuayStringifierFunction.INSTANCE);
 		env.set("printnl", new printnl(this));
 		env.set("printf", new printf());
+		env.set("apairs", new apairs());
+
+		env.set("map", new _map());
+		env.set("list", new _list());
 		return env;
 	}
 
@@ -532,6 +539,23 @@ public class BaseLib extends TwoArgFunction implements ResourceFinder {
 		}
 	}
 
+	// "apairs", // (v1[,...,vN]) -> iter-func, t, 0
+	static final class apairs extends VarArgFunction {
+		inext inext = new inext();
+
+		@Override
+		public Varargs invoke(Varargs args)
+		{
+			int _len = args.narg();
+			LuaList _list = new LuaList(_len);
+			for(int _i=0; _i<_len; _i++)
+			{
+				_list.insert(args.arg(_i+1));
+			}
+			return varargsOf(inext, _list, ZERO);
+		}
+	}
+
 	// "next"  ( table, [index] ) -> next-index, next-value
 	static final class next extends VarArgFunction {
 		@Override
@@ -640,6 +664,32 @@ public class BaseLib extends TwoArgFunction implements ResourceFinder {
 			String _fmt = args.checkjstring(1);
 			globals.STDOUT.print(String.format(_fmt, varArgsTo(args.subargs(2))));
 			return NONE;
+		}
+	}
+
+	// --- Luay Extensions
+	// map(...)
+	final class _map extends VarArgFunction {
+
+		_map() {}
+
+		@Override
+		public Varargs invoke(Varargs args)
+		{
+			return LuayHelper.varargsToTable(args);
+		}
+	}
+
+	// --- Luay Extensions
+	// list(...)
+	final class _list extends VarArgFunction {
+
+		_list() {}
+
+		@Override
+		public Varargs invoke(Varargs args)
+		{
+			return LuayHelper.varargsToList(args);
 		}
 	}
 

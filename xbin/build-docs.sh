@@ -13,9 +13,9 @@ for x in ${XDIR}/../doc/*.md; do
 
 done
 
-#(
+(
 cd $XDIR && $XDIR/md2pdf.sh ${FROM} -o $XDIR/../doc/luay-docs.pdf
-#) >/dev/null 2>/dev/null
+) >/dev/null 2>/dev/null
 
 
 # END.

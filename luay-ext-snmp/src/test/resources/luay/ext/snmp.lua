@@ -2,7 +2,8 @@ local _http = require('snmp')
 
 local _c = snmp.snmpv2('fredonas.local');
 
-local _oid = '.1.3.6'
+local _oid = snmp.oid(1,3,6) -- -> '.1.3.6'
+assert(_oid=='.1.3.6')
 local _row = 'm';
 
 while (not (_oid == nil))

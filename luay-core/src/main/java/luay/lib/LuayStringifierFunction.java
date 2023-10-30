@@ -2,18 +2,21 @@ package luay.lib;
 
 import luay.vm.*;
 
+import java.util.List;
+import java.util.Vector;
+
 public class LuayStringifierFunction extends LuaFunction {
 
     public static final LuayStringifierFunction INSTANCE = new LuayStringifierFunction();
 
     @Override
     public LuaValue call(LuaValue arg) {
-        return _stringify(arg, true);
+        return _stringify(new Vector<>(), arg, true);
     }
 
     @Override
     public Varargs invoke(Varargs args) {
-        return _stringify_vararg(args, true);
+        return _stringify_vararg(new Vector<>(), args, true);
     }
 
     public static LuaValue _stringify_string(LuaString _that, boolean _indicators)
@@ -27,14 +30,19 @@ public class LuayStringifierFunction extends LuaFunction {
 
     public static LuaValue _stringify(LuaValue _that, boolean _indicators)
     {
+        return _stringify(new Vector<>(), _that, _indicators);
+    }
+
+    public static LuaValue _stringify(List<String> _known, LuaValue _that, boolean _indicators)
+    {
         if(_that instanceof LuaList)
         {
-            return _stringify_table((LuaList)_that, _indicators, true);
+            return _stringify_table(_known, (LuaList)_that, _indicators, true);
         }
         else
         if(_that.istable())
         {
-            return _stringify_table((LuaTable)_that, _indicators, false);
+            return _stringify_table(_known,(LuaTable)_that, _indicators, false);
         }
         else
         if(_that instanceof LuaInteger)
@@ -64,26 +72,32 @@ public class LuayStringifierFunction extends LuaFunction {
         return LuaString.valueOf(_that.tojstring());
     }
 
-    public static Varargs _stringify_vararg(Varargs _that, boolean _indicators)
+    public static Varargs _stringify_vararg(List<String> _known, Varargs _that, boolean _indicators)
     {
         // stringify was called with arguments
         if(_that.narg()==2 && "json".equalsIgnoreCase(_that.checkjstring(2)))
         {
-            return _stringify_json(_that.arg1());
+            return _stringify_json(_known,_that.arg1());
         }
         else
         if(_that.narg()==2 && "ldata".equalsIgnoreCase(_that.checkjstring(2)))
         {
-            return _stringify_ldata(_that.arg1());
+            return _stringify_ldata(_known,_that.arg1());
         }
         else // std
         {
-            return _stringify(_that.arg1(), _indicators);
+            return _stringify(_known,_that.arg1(), _indicators);
         }
     }
 
-    public static LuaValue _stringify_table(LuaTable _that, boolean _indicators, boolean _forcelist)
+    public static LuaValue _stringify_table(List<String> _known, LuaTable _that, boolean _indicators, boolean _forcelist)
     {
+        if(_known.contains(_that.toString()))
+        {
+            return LuaString.valueOf("'*"+_that.toString()+"*'");
+        }
+        _known.add(_that.toString());
+
         if(_forcelist || _that.isarray())
         {
             StringBuilder _sb = new StringBuilder();
@@ -93,7 +107,7 @@ public class LuayStringifierFunction extends LuaFunction {
             for(int _i=0; _i<_len; _i++)
             {
                 if(!_first) _sb.append(", ");
-                _sb.append(_stringify(_that.get(_i+1), _indicators).tojstring());
+                _sb.append(_stringify(_known,_that.get(_i+1), _indicators).tojstring());
                 _first=false;
             }
             _sb.append(" ]");
@@ -107,9 +121,9 @@ public class LuayStringifierFunction extends LuaFunction {
             for(LuaValue _i : _that.keys())
             {
                 if(!_first) _sb.append(", ");
-                _sb.append(_stringify(_i, _indicators).tojstring());
+                _sb.append(_stringify(_known,_i, _indicators).tojstring());
                 _sb.append(" -> ");
-                _sb.append(_stringify(_that.get(_i), _indicators).tojstring());
+                _sb.append(_stringify(_known,_that.get(_i), _indicators).tojstring());
                 _first=false;
             }
             _sb.append(" }");
@@ -168,7 +182,7 @@ public class LuayStringifierFunction extends LuaFunction {
         }
     }
 
-    public static LuaValue _stringify_json(LuaValue _that)
+    public static LuaValue _stringify_json(List<String> _known, LuaValue _that)
     {
         if(_that.isnil())
         {
@@ -182,22 +196,22 @@ public class LuayStringifierFunction extends LuaFunction {
         else
         if(_that instanceof LuaList)
         {
-            return _stringify_json_table((LuaList)_that, true);
+            return _stringify_json_table(_known,(LuaList)_that, true);
         }
         else
         if(_that.istable())
         {
-            return _stringify_json_table((LuaTable)_that, false);
+            return _stringify_json_table(_known,(LuaTable)_that, false);
         }
         else
         if(_that instanceof LuaInteger)
         {
-            return _stringify((LuaInteger)_that, false);
+            return _stringify(_known,(LuaInteger)_that, false);
         }
         else
         if(_that instanceof LuaNumber)
         {
-            return _stringify((LuaNumber)_that, false);
+            return _stringify(_known,(LuaNumber)_that, false);
         }
         else
         if(_that.isstring())
@@ -222,8 +236,14 @@ public class LuayStringifierFunction extends LuaFunction {
         return LuaString.valueOf("null");
     }
 
-    private static LuaValue _stringify_json_table(LuaTable _that, boolean _forcelist)
+    private static LuaValue _stringify_json_table(List<String> _known, LuaTable _that, boolean _forcelist)
     {
+        if(_known.contains(_that.toString()))
+        {
+            return LuaString.valueOf("'*"+_that.toString()+"*'");
+        }
+        _known.add(_that.toString());
+
         if(_forcelist || _that.isarray())
         {
             StringBuilder _sb = new StringBuilder();
@@ -233,7 +253,7 @@ public class LuayStringifierFunction extends LuaFunction {
             for(int _i=0; _i<_len; _i++)
             {
                 if(!_first) _sb.append(", ");
-                _sb.append(_stringify_json(_that.get(_i+1)).tojstring());
+                _sb.append(_stringify_json(_known,_that.get(_i+1)).tojstring());
                 _first=false;
             }
             _sb.append(" ]");
@@ -248,9 +268,9 @@ public class LuayStringifierFunction extends LuaFunction {
             for(LuaValue _i : _that.keys())
             {
                 if(!_first) _sb.append(", ");
-                _sb.append(_stringify_json(_i).tojstring());
+                _sb.append(_stringify_json(_known,_i).tojstring());
                 _sb.append(": ");
-                _sb.append(_stringify_json(_that.get(_i)).tojstring());
+                _sb.append(_stringify_json(_known,_that.get(_i)).tojstring());
                 _first=false;
             }
             _sb.append(" }");
@@ -261,7 +281,7 @@ public class LuayStringifierFunction extends LuaFunction {
 
     // LDATA
 
-    public static LuaValue _stringify_ldata(LuaValue _that)
+    public static LuaValue _stringify_ldata(List<String> _known, LuaValue _that)
     {
         if(_that.isnil())
         {
@@ -275,22 +295,22 @@ public class LuayStringifierFunction extends LuaFunction {
         else
         if(_that instanceof LuaList)
         {
-            return _stringify_ldata_table((LuaList)_that, true);
+            return _stringify_ldata_table(_known,(LuaList)_that, true);
         }
         else
         if(_that.istable())
         {
-            return _stringify_ldata_table((LuaTable)_that, false);
+            return _stringify_ldata_table(_known,(LuaTable)_that, false);
         }
         else
         if(_that instanceof LuaInteger)
         {
-            return _stringify((LuaInteger)_that, false);
+            return _stringify(_known,(LuaInteger)_that, false);
         }
         else
         if(_that instanceof LuaNumber)
         {
-            return _stringify((LuaNumber)_that, false);
+            return _stringify(_known,(LuaNumber)_that, false);
         }
         else
         if(_that.isstring())
@@ -319,8 +339,14 @@ public class LuayStringifierFunction extends LuaFunction {
         return LuaString.valueOf(_that.toboolean() ? "TRUE" : "FALSE");
     }
 
-    public static LuaValue _stringify_ldata_table(LuaTable _that, boolean _forcelist)
+    public static LuaValue _stringify_ldata_table(List<String> _known, LuaTable _that, boolean _forcelist)
     {
+        if(_known.contains(_that.toString()))
+        {
+            return LuaString.valueOf("'*"+_that.toString()+"*'");
+        }
+        _known.add(_that.toString());
+
         if(_forcelist || _that.isarray())
         {
             StringBuilder _sb = new StringBuilder();
@@ -330,7 +356,7 @@ public class LuayStringifierFunction extends LuaFunction {
             for(int _i=0; _i<_len; _i++)
             {
                 if(!_first) _sb.append(" ");
-                _sb.append(_stringify_ldata(_that.get(_i+1)).tojstring());
+                _sb.append(_stringify_ldata(_known,_that.get(_i+1)).tojstring());
                 _first=false;
             }
             _sb.append(" ]");
@@ -345,9 +371,9 @@ public class LuayStringifierFunction extends LuaFunction {
             for(LuaValue _i : _that.keys())
             {
                 if(!_first) _sb.append(" ");
-                _sb.append(_stringify_ldata(_i).tojstring());
+                _sb.append(_stringify_ldata(_known,_i).tojstring());
                 _sb.append(" = ");
-                _sb.append(_stringify_ldata(_that.get(_i)).tojstring());
+                _sb.append(_stringify_ldata(_known,_that.get(_i)).tojstring());
                 _first=false;
             }
             _sb.append(" }");

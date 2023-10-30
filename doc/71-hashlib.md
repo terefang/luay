@@ -19,6 +19,7 @@ local hash = require('hash');
 *   `hash.to_uuid (bytes) -> string`
 *   `hash.to_xid (bytes) -> string`
 *   `hash.to_xxid (bytes, bytes) -> string`
+*   `hash.random_string (int [, string[, string]]) -> string`
 
 ### hash object
 

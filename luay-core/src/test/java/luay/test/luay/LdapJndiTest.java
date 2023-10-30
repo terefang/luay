@@ -1,6 +1,7 @@
 package luay.test.luay;
 
 
+import luay.test.luayTestCase;
 import org.junit.jupiter.api.Test;
 
 public class LdapJndiTest extends luayTestCase

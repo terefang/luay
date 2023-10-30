@@ -1,0 +1,6 @@
+package luaycli;
+
+public class Version {
+    public static final String _VERSION = "@VERSION@";
+    public static final String _BUILD = "@BUILD@";
+}

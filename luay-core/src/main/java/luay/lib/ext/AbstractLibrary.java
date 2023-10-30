@@ -173,6 +173,61 @@ public abstract class AbstractLibrary extends TwoArgFunction implements LuayLibr
 		public Varargs invoke(Varargs args) {
 			return this._func.runFunction(args);
 		}
+
+		@Override
+		public Varargs invoke() {
+			return super.invoke();
+		}
+
+		@Override
+		public Varargs invoke(LuaValue arg, Varargs varargs) {
+			return super.invoke(arg, varargs);
+		}
+
+		@Override
+		public Varargs invoke(LuaValue arg1, LuaValue arg2, Varargs varargs) {
+			return super.invoke(arg1, arg2, varargs);
+		}
+
+		@Override
+		public Varargs invoke(LuaValue[] args) {
+			return super.invoke(args);
+		}
+
+		@Override
+		public Varargs invoke(LuaValue[] args, Varargs varargs) {
+			return super.invoke(args, varargs);
+		}
+
+		@Override
+		public Varargs invokemethod(String name) {
+			return super.invokemethod(name);
+		}
+
+		@Override
+		public Varargs invokemethod(LuaValue name) {
+			return super.invokemethod(name);
+		}
+
+		@Override
+		public Varargs invokemethod(String name, Varargs args) {
+			return super.invokemethod(name, args);
+		}
+
+		@Override
+		public Varargs invokemethod(LuaValue name, Varargs args) {
+			return super.invokemethod(name, args);
+		}
+
+		@Override
+		public Varargs invokemethod(String name, LuaValue[] args) {
+			return super.invokemethod(name, args);
+		}
+
+		@Override
+		public Varargs invokemethod(LuaValue name, LuaValue[] args) {
+			return super.invokemethod(name, args);
+		}
 	}
 
 	public String getName() {

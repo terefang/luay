@@ -48,3 +48,11 @@ print('stringify',stringify(_lst))
 
 local _c = 'A'
 print(_c:len())
+
+-- list
+local _l0 = list('v1', 'v2', 'v3')
+print('list',stringify(_l0))
+
+-- map
+local _m0 = map('k1', 'v1', 'k2', 'v2', 'k3', 'v3')
+print('map',stringify(_m0))

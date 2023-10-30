@@ -6,8 +6,8 @@
 local array = require('array');
 ```
 
-*   `array.array() -> array-only-table`
-*   `array.list() -> list-only-table`
+*   `array.array(value[, value ...]) -> array-only-table`
+*   `array.list(value[, value ...]) -> list-only-table`
 *   `array.push (list, value[, value ...]) -> list` \
     Appends the values onto the list, returns the list.
 
@@ -51,13 +51,18 @@ local array = require('array');
 *   `array.indexof( list, fv [, init] ) -> i` \
     Looks through an array table and returning the index of the first element that matches.
 
+\pagebreak
+
 ### map
 
 ```lua
 local map = require('map');
 ```
 
-*   `map.collectk (table[, ..., tableN]) -> list(k1, ..., kX)` \
+*   `map.map (k1,v1[, ..., kN, vN]) -> map-only-table` \
+    Function to collect all kv-pairs into a map-only table.
+
+* `map.collectk (table[, ..., tableN]) -> list(k1, ..., kX)` \
     Function to collect all keys for the list of tables.
 
 *   `map.collectv (table[, ..., tableN]) -> list(v1, ..., vX)` \

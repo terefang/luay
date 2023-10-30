@@ -1,7 +1,7 @@
 package luay.test.luay.java;
 
 
-import luay.test.luay.luayTestCase;
+import luay.test.luayTestCase;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

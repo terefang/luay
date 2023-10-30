@@ -24,12 +24,11 @@ package luay.vm.lib;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 
-import luay.vm.Globals;
-import luay.vm.LuaString;
-import luay.vm.LuaTable;
-import luay.vm.LuaValue;
-import luay.vm.Varargs;
+import luay.vm.*;
 import luay.vm.lib.java.JseIoLib;
 import luay.vm.lib.java.JsePlatform;
 
@@ -201,7 +200,7 @@ public abstract class IoLib extends TwoArgFunction {
 	 * @throws IOException if could not be opened
 	 */
 	abstract protected File openFile(String filename, boolean readMode, boolean appendMode, boolean updateMode,
-		boolean binaryMode) throws IOException;
+									 boolean binaryMode) throws IOException;
 
 	/**
 	 * Open a temporary file.
@@ -285,6 +284,10 @@ public abstract class IoLib extends TwoArgFunction {
 		setLibInstance(filemethods);
 		setLibInstance(mt);
 
+		// Luay Extensions
+		t.set("loadasstring", new _loadAsString());
+		t.set("loadastable", new _loadAsTable());
+
 		// return the table
 		env.set("io", t);
 		if (!env.get("package").isnil())
@@ -292,461 +295,498 @@ public abstract class IoLib extends TwoArgFunction {
 		return t;
 	}
 
-	private void setLibInstance(LuaTable t) {
-		LuaValue[] k = t.keys();
-		for (int i = 0, n = k.length; i < n; i++)
-			((IoLibV) t.get(k[i])).iolib = this;
-	}
-
-	static final class IoLibV extends VarArgFunction {
-		private File    f;
-		public IoLib    iolib;
-		private boolean toclose;
-		private Varargs args;
-
-		public IoLibV() {
-		}
-
-		public IoLibV(File f, String name, int opcode, IoLib iolib, boolean toclose, Varargs args) {
-			this(f, name, opcode, iolib);
-			this.toclose = toclose;
-			this.args = args.dealias();
-		}
-
-		public IoLibV(File f, String name, int opcode, IoLib iolib) {
-			this.f = f;
-			this.name = name;
-			this.opcode = opcode;
-			this.iolib = iolib;
-		}
-
+	public static class _loadAsString extends VarArgFunction
+	{
 		@Override
 		public Varargs invoke(Varargs args) {
-			try {
-				switch (opcode) {
-				case IO_FLUSH:
-					return iolib._io_flush();
-				case IO_TMPFILE:
-					return iolib._io_tmpfile();
-				case IO_CLOSE:
-					return iolib._io_close(args.arg1());
-				case IO_INPUT:
-					return iolib._io_input(args.arg1());
-				case IO_OUTPUT:
-					return iolib._io_output(args.arg1());
-				case IO_TYPE:
-					return iolib._io_type(args.arg1());
-				case IO_POPEN:
-					return iolib._io_popen(args.checkjstring(1), args.optjstring(2, "r"));
-				case IO_OPEN:
-					return iolib._io_open(args.checkjstring(1), args.optjstring(2, "r"));
-				case IO_LINES:
-					return iolib._io_lines(args);
-				case IO_READ:
-					return iolib._io_read(args);
-				case IO_WRITE:
-					return iolib._io_write(args);
-
-				case FILE_CLOSE:
-					return iolib._file_close(args.arg1());
-				case FILE_FLUSH:
-					return iolib._file_flush(args.arg1());
-				case FILE_SETVBUF:
-					return iolib._file_setvbuf(args.arg1(), args.checkjstring(2), args.optint(3, 8192));
-				case FILE_LINES:
-					return iolib._file_lines(args);
-				case FILE_READ:
-					return iolib._file_read(args.arg1(), args.subargs(2));
-				case FILE_SEEK:
-					return iolib._file_seek(args.arg1(), args.optjstring(2, "cur"), args.optint(3, 0));
-				case FILE_WRITE:
-					return iolib._file_write(args.arg1(), args.subargs(2));
-
-				case IO_INDEX:
-					return iolib._io_index(args.arg(2));
-				case LINES_ITER:
-					return iolib._lines_iter(f, toclose, this.args);
-				}
-			} catch (IOException ioe) {
-				if (opcode == LINES_ITER) {
-					String s = ioe.getMessage();
-					error(s != null? s: ioe.toString());
-				}
-				return errorresult(ioe);
+			try
+			{
+				String _fn = args.checkjstring(1);
+				return varargsOf(LuaValue.valueOf(Files.readString(Path.of(_fn))), LuaValue.NIL);
 			}
-			return NONE;
-		}
-	}
-
-	private File input() {
-		return infile != null? infile: (infile = ioopenfile(FTYPE_STDIN, "-", "r"));
-	}
-
-	//	io.flush() -> bool
-	public Varargs _io_flush() throws IOException {
-		checkopen(output());
-		outfile.flush();
-		return LuaValue.TRUE;
-	}
-
-	//	io.tmpfile() -> file
-	public Varargs _io_tmpfile() throws IOException {
-		return tmpFile();
-	}
-
-	//	io.close([file]) -> void
-	public Varargs _io_close(LuaValue file) throws IOException {
-		File f = file.isnil()? output(): checkfile(file);
-		checkopen(f);
-		return ioclose(f);
-	}
-
-	//	io.input([file]) -> file
-	public Varargs _io_input(LuaValue file) {
-		infile = file.isnil()? input()
-			: file.isstring()? ioopenfile(FTYPE_NAMED, file.checkjstring(), "r"): checkfile(file);
-		return infile;
-	}
-
-	// io.output(filename) -> file
-	public Varargs _io_output(LuaValue filename) {
-		outfile = filename.isnil()? output()
-			: filename.isstring()? ioopenfile(FTYPE_NAMED, filename.checkjstring(), "w"): checkfile(filename);
-		return outfile;
-	}
-
-	//	io.type(obj) -> "file" | "closed file" | nil
-	public Varargs _io_type(LuaValue obj) {
-		File f = optfile(obj);
-		return f != null? f.isclosed()? CLOSED_FILE: FILE: NIL;
-	}
-
-	// io.popen(prog, [mode]) -> file
-	public Varargs _io_popen(String prog, String mode) throws IOException {
-		if (!"r".equals(mode) && !"w".equals(mode))
-			argerror(2, "invalid value: '" + mode + "'; must be one of 'r' or 'w'");
-		return openProgram(prog, mode);
-	}
-
-	//	io.open(filename, [mode]) -> file | nil,err
-	public Varargs _io_open(String filename, String mode) throws IOException {
-		return rawopenfile(FTYPE_NAMED, filename, mode);
-	}
-
-	//	io.lines(filename, ...) -> iterator
-	public Varargs _io_lines(Varargs args) {
-		String filename = args.optjstring(1, null);
-		File infile = filename == null? input(): ioopenfile(FTYPE_NAMED, filename, "r");
-		checkopen(infile);
-		return lines(infile, filename != null, args.subargs(2));
-	}
-
-	//	io.read(...) -> (...)
-	public Varargs _io_read(Varargs args) throws IOException {
-		checkopen(input());
-		return ioread(infile, args);
-	}
-
-	//	io.write(...) -> void
-	public Varargs _io_write(Varargs args) throws IOException {
-		checkopen(output());
-		return iowrite(outfile, args);
-	}
-
-	// file:close() -> void
-	public Varargs _file_close(LuaValue file) throws IOException {
-		return ioclose(checkfile(file));
-	}
-
-	// file:flush() -> void
-	public Varargs _file_flush(LuaValue file) throws IOException {
-		checkfile(file).flush();
-		return LuaValue.TRUE;
-	}
-
-	// file:setvbuf(mode,[size]) -> void
-	public Varargs _file_setvbuf(LuaValue file, String mode, int size) {
-		if ("no".equals(mode)) {
-		} else if ("full".equals(mode)) {
-		} else if ("line".equals(mode)) {
-		} else {
-			argerror(1, "invalid value: '" + mode + "'; must be one of 'no', 'full' or 'line'");
-		}
-		checkfile(file).setvbuf(mode, size);
-		return LuaValue.TRUE;
-	}
-
-	// file:lines(...) -> iterator
-	public Varargs _file_lines(Varargs args) {
-		return lines(checkfile(args.arg1()), false, args.subargs(2));
-	}
-
-	//	file:read(...) -> (...)
-	public Varargs _file_read(LuaValue file, Varargs subargs) throws IOException {
-		return ioread(checkfile(file), subargs);
-	}
-
-	//  file:seek([whence][,offset]) -> pos | nil,error
-	public Varargs _file_seek(LuaValue file, String whence, int offset) throws IOException {
-		if ("set".equals(whence)) {
-		} else if ("end".equals(whence)) {
-		} else if ("cur".equals(whence)) {
-		} else {
-			argerror(1, "invalid value: '" + whence + "'; must be one of 'set', 'cur' or 'end'");
-		}
-		return valueOf(checkfile(file).seek(whence, offset));
-	}
-
-	//	file:write(...) -> void
-	public Varargs _file_write(LuaValue file, Varargs subargs) throws IOException {
-		return iowrite(checkfile(file), subargs);
-	}
-
-	// __index, returns a field
-	public Varargs _io_index(LuaValue v) {
-		return v.equals(STDOUT)? output(): v.equals(STDIN)? input(): v.equals(STDERR)? errput(): NIL;
-	}
-
-	//	lines iterator(s,var) -> var'
-	public Varargs _lines_iter(LuaValue file, boolean toclose, Varargs args) throws IOException {
-		File f = optfile(file);
-		if (f == null)
-			argerror(1, "not a file: " + file);
-		if (f.isclosed())
-			error("file is already closed");
-		Varargs ret = ioread(f, args);
-		if (toclose && ret.isnil(1) && f.eof())
-			f.close();
-		return ret;
-	}
-
-	private File output() {
-		return outfile != null? outfile: (outfile = ioopenfile(FTYPE_STDOUT, "-", "w"));
-	}
-
-	private File errput() {
-		return errfile != null? errfile: (errfile = ioopenfile(FTYPE_STDERR, "-", "w"));
-	}
-
-	private File ioopenfile(int filetype, String filename, String mode) {
-		try {
-			return rawopenfile(filetype, filename, mode);
-		} catch (Exception e) {
-			error("io error: " + e.getMessage());
-			return null;
-		}
-	}
-
-	private static Varargs ioclose(File f) throws IOException {
-		if (f.isstdfile())
-			return errorresult("cannot close standard file");
-		else {
-			f.close();
-			return successresult();
-		}
-	}
-
-	private static Varargs successresult() {
-		return LuaValue.TRUE;
-	}
-
-	static Varargs errorresult(Exception ioe) {
-		String s = ioe.getMessage();
-		return errorresult("io error: " + (s != null? s: ioe.toString()));
-	}
-
-	private static Varargs errorresult(String errortext) {
-		return varargsOf(NIL, valueOf(errortext));
-	}
-
-	private Varargs lines(final File f, boolean toclose, Varargs args) {
-		try {
-			return new IoLibV(f, "lnext", LINES_ITER, this, toclose, args);
-		} catch (Exception e) {
-			return error("lines: " + e);
-		}
-	}
-
-	private static Varargs iowrite(File f, Varargs args) throws IOException {
-		for (int i = 1, n = args.narg(); i <= n; i++)
-			f.write(args.checkstring(i));
-		return f;
-	}
-
-	private Varargs ioread(File f, Varargs args) throws IOException {
-		int i, n = args.narg();
-		if (n == 0)
-			return freadline(f, false);
-		LuaValue[] v = new LuaValue[n];
-		LuaValue ai, vi;
-		LuaString fmt;
-		for (i = 0; i < n;) {
-			item: switch ((ai = args.arg(i+1)).type()) {
-			case LuaValue.TNUMBER:
-				vi = freadbytes(f, ai.toint());
-				break item;
-			case LuaValue.TSTRING:
-				fmt = ai.checkstring();
-				byte _opt = 0;
-				if (fmt.m_length >= 2 && fmt.m_bytes[fmt.m_offset] == '*') {
-					_opt = fmt.m_bytes[fmt.m_offset+1];
-				}
-				// support lua 5.3 options
-				else if (fmt.m_length == 1) {
-					_opt = fmt.m_bytes[fmt.m_offset];
-				}
-				switch (_opt) {
-					case 'n':
-						vi = freadnumber(f);
-						break item;
-					case 'l':
-						vi = freadline(f, false);
-						break item;
-					case 'L':
-						vi = freadline(f, true);
-						break item;
-					case 'a':
-						vi = freadall(f);
-						break item;
-				}
-			default:
-				return argerror(i+1, "(invalid format)");
+			catch (Exception _xe)
+			{
+				return varargsOf(LuaValue.NIL, LuaValue.valueOf(_xe.getMessage()));
 			}
-			if ((v[i++] = vi).isnil())
-				break;
 		}
-		return i == 0? NIL: varargsOf(v, 0, i);
 	}
 
-	private static File checkfile(LuaValue val) {
-		File f = optfile(val);
-		if (f == null)
-			argerror(1, "file");
-		checkopen(f);
-		return f;
-	}
-
-	private static File optfile(LuaValue val) {
-		return (val instanceof File)? (File) val: null;
-	}
-
-	private static File checkopen(File file) {
-		if (file.isclosed())
-			error("attempt to use a closed file");
-		return file;
-	}
-
-	private File rawopenfile(int filetype, String filename, String mode) throws IOException {
-		int len = mode.length();
-		for (int i = 0; i < len; i++) { // [rwa][+]?b*
-			char ch = mode.charAt(i);
-			if ((i == 0 && "rwa".indexOf(ch) >= 0) || (i == 1 && ch == '+'))
-				continue;
-			if (i >= 1 && ch == 'b')
-				continue;
-			len = -1;
-			break;
+	public static class _loadAsTable extends VarArgFunction
+	{
+		@Override
+		public Varargs invoke(Varargs args) {
+			try
+			{
+				LuaList _l = new LuaList();
+				String _fn = args.checkjstring(1);
+				for(String _s : Files.readAllLines(Path.of(_fn), StandardCharsets.UTF_8))
+				{
+					_l.insert(LuaValue.valueOf(_s));
+				}
+				return varargsOf(_l, LuaValue.NIL);
+			}
+			catch (Exception _xe)
+			{
+				return varargsOf(LuaValue.NIL, LuaValue.valueOf(_xe.getMessage()));
+			}
 		}
-		if (len <= 0)
-			argerror(2, "invalid mode: '" + mode + "'");
+	}
 
-		switch (filetype) {
-		case FTYPE_STDIN:
-			return wrapStdin();
-		case FTYPE_STDOUT:
-			return wrapStdout();
-		case FTYPE_STDERR:
-			return wrapStderr();
+		private void setLibInstance(LuaTable t) {
+			LuaValue[] k = t.keys();
+			for (int i = 0, n = k.length; i < n; i++)
+				((IoLibV) t.get(k[i])).iolib = this;
 		}
-		boolean isreadmode = mode.startsWith("r");
-		boolean isappend = mode.startsWith("a");
-		boolean isupdate = mode.indexOf('+') > 0;
-		boolean isbinary = mode.endsWith("b");
-		return openFile(filename, isreadmode, isappend, isupdate, isbinary);
-	}
 
-	// ------------- file reading utilitied ------------------
+		static final class IoLibV extends VarArgFunction {
+			private File    f;
+			public IoLib    iolib;
+			private boolean toclose;
+			private Varargs args;
 
-	public static LuaValue freadbytes(File f, int count) throws IOException {
-		if (count == 0)
-			return f.eof()? NIL: EMPTYSTRING;
-		byte[] b = new byte[count];
-		int r;
-		if ((r = f.read(b, 0, b.length)) < 0)
-			return NIL;
-		return LuaString.valueUsing(b, 0, r);
-	}
+			public IoLibV() {
+			}
 
-	public static LuaValue freaduntil(File f, boolean lineonly, boolean withend) throws IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		int c;
-		try {
-			if (lineonly) {
-				loop: while ( (c = f.read()) >= 0 ) {
-					switch (c) {
-					case '\r':
-						if (withend)
-							baos.write(c);
-						break;
-					case '\n':
-						if (withend)
-							baos.write(c);
-						break loop;
-					default:
-						baos.write(c);
-						break;
+			public IoLibV(File f, String name, int opcode, IoLib iolib, boolean toclose, Varargs args) {
+				this(f, name, opcode, iolib);
+				this.toclose = toclose;
+				this.args = args.dealias();
+			}
+
+			public IoLibV(File f, String name, int opcode, IoLib iolib) {
+				this.f = f;
+				this.name = name;
+				this.opcode = opcode;
+				this.iolib = iolib;
+			}
+
+			@Override
+			public Varargs invoke(Varargs args) {
+				try {
+					switch (opcode) {
+						case IO_FLUSH:
+							return iolib._io_flush();
+						case IO_TMPFILE:
+							return iolib._io_tmpfile();
+						case IO_CLOSE:
+							return iolib._io_close(args.arg1());
+						case IO_INPUT:
+							return iolib._io_input(args.arg1());
+						case IO_OUTPUT:
+							return iolib._io_output(args.arg1());
+						case IO_TYPE:
+							return iolib._io_type(args.arg1());
+						case IO_POPEN:
+							return iolib._io_popen(args.checkjstring(1), args.optjstring(2, "r"));
+						case IO_OPEN:
+							return iolib._io_open(args.checkjstring(1), args.optjstring(2, "r"));
+						case IO_LINES:
+							return iolib._io_lines(args);
+						case IO_READ:
+							return iolib._io_read(args);
+						case IO_WRITE:
+							return iolib._io_write(args);
+
+						case FILE_CLOSE:
+							return iolib._file_close(args.arg1());
+						case FILE_FLUSH:
+							return iolib._file_flush(args.arg1());
+						case FILE_SETVBUF:
+							return iolib._file_setvbuf(args.arg1(), args.checkjstring(2), args.optint(3, 8192));
+						case FILE_LINES:
+							return iolib._file_lines(args);
+						case FILE_READ:
+							return iolib._file_read(args.arg1(), args.subargs(2));
+						case FILE_SEEK:
+							return iolib._file_seek(args.arg1(), args.optjstring(2, "cur"), args.optint(3, 0));
+						case FILE_WRITE:
+							return iolib._file_write(args.arg1(), args.subargs(2));
+
+						case IO_INDEX:
+							return iolib._io_index(args.arg(2));
+						case LINES_ITER:
+							return iolib._lines_iter(f, toclose, this.args);
 					}
+				} catch (IOException ioe) {
+					if (opcode == LINES_ITER) {
+						String s = ioe.getMessage();
+						error(s != null? s: ioe.toString());
+					}
+					return errorresult(ioe);
 				}
+				return NONE;
+			}
+		}
+
+		private File input() {
+			return infile != null? infile: (infile = ioopenfile(FTYPE_STDIN, "-", "r"));
+		}
+
+		//	io.flush() -> bool
+		public Varargs _io_flush() throws IOException {
+			checkopen(output());
+			outfile.flush();
+			return LuaValue.TRUE;
+		}
+
+		//	io.tmpfile() -> file
+		public Varargs _io_tmpfile() throws IOException {
+			return tmpFile();
+		}
+
+		//	io.close([file]) -> void
+		public Varargs _io_close(LuaValue file) throws IOException {
+			File f = file.isnil()? output(): checkfile(file);
+			checkopen(f);
+			return ioclose(f);
+		}
+
+		//	io.input([file]) -> file
+		public Varargs _io_input(LuaValue file) {
+			infile = file.isnil()? input()
+					: file.isstring()? ioopenfile(FTYPE_NAMED, file.checkjstring(), "r"): checkfile(file);
+			return infile;
+		}
+
+		// io.output(filename) -> file
+		public Varargs _io_output(LuaValue filename) {
+			outfile = filename.isnil()? output()
+					: filename.isstring()? ioopenfile(FTYPE_NAMED, filename.checkjstring(), "w"): checkfile(filename);
+			return outfile;
+		}
+
+		//	io.type(obj) -> "file" | "closed file" | nil
+		public Varargs _io_type(LuaValue obj) {
+			File f = optfile(obj);
+			return f != null? f.isclosed()? CLOSED_FILE: FILE: NIL;
+		}
+
+		// io.popen(prog, [mode]) -> file
+		public Varargs _io_popen(String prog, String mode) throws IOException {
+			if (!"r".equals(mode) && !"w".equals(mode))
+				argerror(2, "invalid value: '" + mode + "'; must be one of 'r' or 'w'");
+			return openProgram(prog, mode);
+		}
+
+		//	io.open(filename, [mode]) -> file | nil,err
+		public Varargs _io_open(String filename, String mode) throws IOException {
+			return rawopenfile(FTYPE_NAMED, filename, mode);
+		}
+
+		//	io.lines(filename, ...) -> iterator
+		public Varargs _io_lines(Varargs args) {
+			String filename = args.optjstring(1, null);
+			File infile = filename == null? input(): ioopenfile(FTYPE_NAMED, filename, "r");
+			checkopen(infile);
+			return lines(infile, filename != null, args.subargs(2));
+		}
+
+		//	io.read(...) -> (...)
+		public Varargs _io_read(Varargs args) throws IOException {
+			checkopen(input());
+			return ioread(infile, args);
+		}
+
+		//	io.write(...) -> void
+		public Varargs _io_write(Varargs args) throws IOException {
+			checkopen(output());
+			return iowrite(outfile, args);
+		}
+
+		// file:close() -> void
+		public Varargs _file_close(LuaValue file) throws IOException {
+			return ioclose(checkfile(file));
+		}
+
+		// file:flush() -> void
+		public Varargs _file_flush(LuaValue file) throws IOException {
+			checkfile(file).flush();
+			return LuaValue.TRUE;
+		}
+
+		// file:setvbuf(mode,[size]) -> void
+		public Varargs _file_setvbuf(LuaValue file, String mode, int size) {
+			if ("no".equals(mode)) {
+			} else if ("full".equals(mode)) {
+			} else if ("line".equals(mode)) {
 			} else {
-				while ( (c = f.read()) >= 0 )
+				argerror(1, "invalid value: '" + mode + "'; must be one of 'no', 'full' or 'line'");
+			}
+			checkfile(file).setvbuf(mode, size);
+			return LuaValue.TRUE;
+		}
+
+		// file:lines(...) -> iterator
+		public Varargs _file_lines(Varargs args) {
+			return lines(checkfile(args.arg1()), false, args.subargs(2));
+		}
+
+		//	file:read(...) -> (...)
+		public Varargs _file_read(LuaValue file, Varargs subargs) throws IOException {
+			return ioread(checkfile(file), subargs);
+		}
+
+		//  file:seek([whence][,offset]) -> pos | nil,error
+		public Varargs _file_seek(LuaValue file, String whence, int offset) throws IOException {
+			if ("set".equals(whence)) {
+			} else if ("end".equals(whence)) {
+			} else if ("cur".equals(whence)) {
+			} else {
+				argerror(1, "invalid value: '" + whence + "'; must be one of 'set', 'cur' or 'end'");
+			}
+			return valueOf(checkfile(file).seek(whence, offset));
+		}
+
+		//	file:write(...) -> void
+		public Varargs _file_write(LuaValue file, Varargs subargs) throws IOException {
+			return iowrite(checkfile(file), subargs);
+		}
+
+		// __index, returns a field
+		public Varargs _io_index(LuaValue v) {
+			return v.equals(STDOUT)? output(): v.equals(STDIN)? input(): v.equals(STDERR)? errput(): NIL;
+		}
+
+		//	lines iterator(s,var) -> var'
+		public Varargs _lines_iter(LuaValue file, boolean toclose, Varargs args) throws IOException {
+			File f = optfile(file);
+			if (f == null)
+				argerror(1, "not a file: " + file);
+			if (f.isclosed())
+				error("file is already closed");
+			Varargs ret = ioread(f, args);
+			if (toclose && ret.isnil(1) && f.eof())
+				f.close();
+			return ret;
+		}
+
+		private File output() {
+			return outfile != null? outfile: (outfile = ioopenfile(FTYPE_STDOUT, "-", "w"));
+		}
+
+		private File errput() {
+			return errfile != null? errfile: (errfile = ioopenfile(FTYPE_STDERR, "-", "w"));
+		}
+
+		private File ioopenfile(int filetype, String filename, String mode) {
+			try {
+				return rawopenfile(filetype, filename, mode);
+			} catch (Exception e) {
+				error("io error: " + e.getMessage());
+				return null;
+			}
+		}
+
+		private static Varargs ioclose(File f) throws IOException {
+			if (f.isstdfile())
+				return errorresult("cannot close standard file");
+			else {
+				f.close();
+				return successresult();
+			}
+		}
+
+		private static Varargs successresult() {
+			return LuaValue.TRUE;
+		}
+
+		static Varargs errorresult(Exception ioe) {
+			String s = ioe.getMessage();
+			return errorresult("io error: " + (s != null? s: ioe.toString()));
+		}
+
+		private static Varargs errorresult(String errortext) {
+			return varargsOf(NIL, valueOf(errortext));
+		}
+
+		private Varargs lines(final File f, boolean toclose, Varargs args) {
+			try {
+				return new IoLibV(f, "lnext", LINES_ITER, this, toclose, args);
+			} catch (Exception e) {
+				return error("lines: " + e);
+			}
+		}
+
+		private static Varargs iowrite(File f, Varargs args) throws IOException {
+			for (int i = 1, n = args.narg(); i <= n; i++)
+				f.write(args.checkstring(i));
+			return f;
+		}
+
+		private Varargs ioread(File f, Varargs args) throws IOException {
+			int i, n = args.narg();
+			if (n == 0)
+				return freadline(f, false);
+			LuaValue[] v = new LuaValue[n];
+			LuaValue ai, vi;
+			LuaString fmt;
+			for (i = 0; i < n;) {
+				item: switch ((ai = args.arg(i+1)).type()) {
+					case LuaValue.TNUMBER:
+						vi = freadbytes(f, ai.toint());
+						break item;
+					case LuaValue.TSTRING:
+						fmt = ai.checkstring();
+						byte _opt = 0;
+						if (fmt.m_length >= 2 && fmt.m_bytes[fmt.m_offset] == '*') {
+							_opt = fmt.m_bytes[fmt.m_offset+1];
+						}
+						// support lua 5.3 options
+						else if (fmt.m_length == 1) {
+							_opt = fmt.m_bytes[fmt.m_offset];
+						}
+						switch (_opt) {
+							case 'n':
+								vi = freadnumber(f);
+								break item;
+							case 'l':
+								vi = freadline(f, false);
+								break item;
+							case 'L':
+								vi = freadline(f, true);
+								break item;
+							case 'a':
+								vi = freadall(f);
+								break item;
+						}
+					default:
+						return argerror(i+1, "(invalid format)");
+				}
+				if ((v[i++] = vi).isnil())
+					break;
+			}
+			return i == 0? NIL: varargsOf(v, 0, i);
+		}
+
+		private static File checkfile(LuaValue val) {
+			File f = optfile(val);
+			if (f == null)
+				argerror(1, "file");
+			checkopen(f);
+			return f;
+		}
+
+		private static File optfile(LuaValue val) {
+			return (val instanceof File)? (File) val: null;
+		}
+
+		private static File checkopen(File file) {
+			if (file.isclosed())
+				error("attempt to use a closed file");
+			return file;
+		}
+
+		private File rawopenfile(int filetype, String filename, String mode) throws IOException {
+			int len = mode.length();
+			for (int i = 0; i < len; i++) { // [rwa][+]?b*
+				char ch = mode.charAt(i);
+				if ((i == 0 && "rwa".indexOf(ch) >= 0) || (i == 1 && ch == '+'))
+					continue;
+				if (i >= 1 && ch == 'b')
+					continue;
+				len = -1;
+				break;
+			}
+			if (len <= 0)
+				argerror(2, "invalid mode: '" + mode + "'");
+
+			switch (filetype) {
+				case FTYPE_STDIN:
+					return wrapStdin();
+				case FTYPE_STDOUT:
+					return wrapStdout();
+				case FTYPE_STDERR:
+					return wrapStderr();
+			}
+			boolean isreadmode = mode.startsWith("r");
+			boolean isappend = mode.startsWith("a");
+			boolean isupdate = mode.indexOf('+') > 0;
+			boolean isbinary = mode.endsWith("b");
+			return openFile(filename, isreadmode, isappend, isupdate, isbinary);
+		}
+
+		// ------------- file reading utilitied ------------------
+
+		public static LuaValue freadbytes(File f, int count) throws IOException {
+			if (count == 0)
+				return f.eof()? NIL: EMPTYSTRING;
+			byte[] b = new byte[count];
+			int r;
+			if ((r = f.read(b, 0, b.length)) < 0)
+				return NIL;
+			return LuaString.valueUsing(b, 0, r);
+		}
+
+		public static LuaValue freaduntil(File f, boolean lineonly, boolean withend) throws IOException {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			int c;
+			try {
+				if (lineonly) {
+					loop: while ( (c = f.read()) >= 0 ) {
+						switch (c) {
+							case '\r':
+								if (withend)
+									baos.write(c);
+								break;
+							case '\n':
+								if (withend)
+									baos.write(c);
+								break loop;
+							default:
+								baos.write(c);
+								break;
+						}
+					}
+				} else {
+					while ( (c = f.read()) >= 0 )
+						baos.write(c);
+				}
+			} catch (EOFException e) {
+				c = -1;
+			}
+			return (c < 0 && baos.size() == 0)? (LuaValue) NIL: (LuaValue) LuaString.valueUsing(baos.toByteArray());
+		}
+
+		public static LuaValue freadline(File f, boolean withend) throws IOException {
+			return freaduntil(f, true, withend);
+		}
+
+		public static LuaValue freadall(File f) throws IOException {
+			int n = f.remaining();
+			if (n >= 0) {
+				return n == 0? EMPTYSTRING: freadbytes(f, n);
+			} else {
+				return freaduntil(f, false, false);
+			}
+		}
+
+		public static LuaValue freadnumber(File f) throws IOException {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			freadchars(f, " \t\r\n", null);
+			freadchars(f, "-+", baos);
+			//freadchars(f,"0",baos);
+			//freadchars(f,"xX",baos);
+			freadchars(f, "0123456789", baos);
+			freadchars(f, ".", baos);
+			freadchars(f, "0123456789", baos);
+			//freadchars(f,"eEfFgG",baos);
+			// freadchars(f,"+-",baos);
+			//freadchars(f,"0123456789",baos);
+			String s = baos.toString();
+			return s.length() > 0? valueOf(Double.parseDouble(s)): NIL;
+		}
+
+		private static void freadchars(File f, String chars, ByteArrayOutputStream baos) throws IOException {
+			int c;
+			while ( true ) {
+				c = f.peek();
+				if (chars.indexOf(c) < 0) {
+					return;
+				}
+				f.read();
+				if (baos != null)
 					baos.write(c);
 			}
-		} catch (EOFException e) {
-			c = -1;
 		}
-		return (c < 0 && baos.size() == 0)? (LuaValue) NIL: (LuaValue) LuaString.valueUsing(baos.toByteArray());
-	}
-
-	public static LuaValue freadline(File f, boolean withend) throws IOException {
-		return freaduntil(f, true, withend);
-	}
-
-	public static LuaValue freadall(File f) throws IOException {
-		int n = f.remaining();
-		if (n >= 0) {
-			return n == 0? EMPTYSTRING: freadbytes(f, n);
-		} else {
-			return freaduntil(f, false, false);
-		}
-	}
-
-	public static LuaValue freadnumber(File f) throws IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		freadchars(f, " \t\r\n", null);
-		freadchars(f, "-+", baos);
-		//freadchars(f,"0",baos);
-		//freadchars(f,"xX",baos);
-		freadchars(f, "0123456789", baos);
-		freadchars(f, ".", baos);
-		freadchars(f, "0123456789", baos);
-		//freadchars(f,"eEfFgG",baos);
-		// freadchars(f,"+-",baos);
-		//freadchars(f,"0123456789",baos);
-		String s = baos.toString();
-		return s.length() > 0? valueOf(Double.parseDouble(s)): NIL;
-	}
-
-	private static void freadchars(File f, String chars, ByteArrayOutputStream baos) throws IOException {
-		int c;
-		while ( true ) {
-			c = f.peek();
-			if (chars.indexOf(c) < 0) {
-				return;
-			}
-			f.read();
-			if (baos != null)
-				baos.write(c);
-		}
-	}
 
 }

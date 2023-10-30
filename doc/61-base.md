@@ -7,11 +7,11 @@ Refer: http://www.lua.org/manual/5.2/manual.html#6.1
 *   `dofile ([filename])`
 *   `error (message [, level])`
 *   `_G`
-*   `ipairs (t)`
+*   `ipairs (t) -> iterator, t, 0`
 *   `load (ld [, source [, mode [, env]]])`
 *   `loadfile ([filename [, mode [, env]]])`
 *   `next (table [, index])`
-*   `pairs (t)`
+*   `pairs (t) -> iterator, t, nil`
 *   `pcall (f [, arg1, ···])`
 *   `print (···)`
 *   `rawequal (v1, v2)`
@@ -30,5 +30,11 @@ Refer: http://www.lua.org/manual/5.2/manual.html#6.1
 
 *   `stringify (string[, type])`
 *   `printf (···)`
+*   `apairs(v1[,...,vN]) -> iterator, list, 0` — inspired from idle-lang
+*   `list(value[, value ...]) -> list-only-table`
+*   `map(key1, value1 [, keyN, valueN ...]) -> map-only-table`
+
+*   `__FILE__` — filepath of the initial executed script, if available.
+*   `__PATH__` — path containing the initial executed script, if available.
 
 \pagebreak

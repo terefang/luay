@@ -17,10 +17,12 @@ import java.util.Vector;
 
 public class LuayBuilder
 {
+    private boolean noDefaultSearchPaths = false;
     private List<LuaValue> globalLibs = new Vector<>();
     private List<String> namedLibs = new Vector<>();
     private List<LuaValue> extLibs = new Vector<>();
     private List<String> searchPath = new Vector<>();
+
     private List<String> searchPackages = new Vector<>();
     private OutputStream outputStream;
     private InputStream inputStream;
@@ -40,11 +42,21 @@ public class LuayBuilder
         _globals.load(new BaseLib());
 
         PackageLib _pkglib = new PackageLib();
+        _pkglib.noDefaultSearchPaths = this.noDefaultSearchPaths;
         _globals.load(_pkglib);
 
         StringBuilder _sb = new StringBuilder();
         this.searchPath.forEach((x) -> _sb.append(x+";"));
-        _sb.append(";?.lua");
+
+        if(!this.noDefaultSearchPaths)
+        {
+            _sb.append("./?.lua;./?/init.lua;");
+            _sb.append("?.lua;?/init.lua");
+        }
+        else
+        {
+            _sb.setLength(_sb.length()-1);
+        }
         _pkglib.setLuaPath(_sb.toString());
 
         if(this.outputStream!=null)
@@ -59,7 +71,7 @@ public class LuayBuilder
 
         if(this.errorStream!=null)
         {
-            _globals.STDOUT=new PrintStream(this.errorStream);
+            _globals.STDERR=new PrintStream(this.errorStream);
         }
 
         this.globalLibs.forEach((x) -> _globals.load(x));
@@ -68,7 +80,7 @@ public class LuayBuilder
 
         LoadState.install(_globals);
         LuaC.install(_globals);
-        LuaJC.install(_globals);
+        //LuaJC.install(_globals);
 
         return new LuayContext(_globals);
     }
@@ -123,24 +135,18 @@ public class LuayBuilder
     public LuayBuilder javaLibraries()
     {
         this.globalLibs.add(new LuajavaLib().addSearchPackages(this.searchPackages));
-        // --- dont need this anymore
-        // --- luay-factory will take care of
-        // this.namedLibrary("hash");
-        // this.namedLibrary("path");
-        return this;
-    }
-
-    public LuayBuilder rocksLibraries()
-    {
-        // --- dont need this anymore
-        // --- luay-factory will take care of
-        //this.namedLibrary("lfs");
         return this;
     }
 
     public LuayBuilder allLibraries()
     {
-        return this.baseLibraries().javaLibraries().v53Libraries().rocksLibraries();
+        return this.baseLibraries().javaLibraries().v53Libraries();
+    }
+
+    public LuayBuilder noDefaultSearchPaths(boolean _b)
+    {
+        this.noDefaultSearchPaths = _b;
+        return this;
     }
 
     public LuayBuilder searchPath(String _path)
@@ -152,6 +158,7 @@ public class LuayBuilder
         else
         {
             this.searchPath.add(_path+"/?.lua");
+            this.searchPath.add(_path+"/?/init.lua");
         }
         return this;
     }

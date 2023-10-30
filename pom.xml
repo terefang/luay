@@ -6,14 +6,15 @@
 
     <groupId>com.github.terefang.luay</groupId>
     <artifactId>luay</artifactId>
-    <version>2023.4.229</version>
+    <version>2023.10.231</version>
     <packaging>pom</packaging>
     <modules>
         <module>luay-core</module>
-        <module>luay-ext</module>
         <module>luay-ext-dao</module>
         <module>luay-ext-okhttp</module>
         <module>luay-ext-snmp</module>
+        <module>luay-gui</module>
+        <module>luay-cli</module>
     </modules>
 
     <properties>
@@ -22,6 +23,20 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.jmelange>2023.4.237</version.jmelange>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>4.2.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.15</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -30,7 +45,7 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
                 <inherited>false</inherited>
-                              <executions>
+                <executions>
                     <execution>
                         <id>ant</id>
                         <phase>package</phase>

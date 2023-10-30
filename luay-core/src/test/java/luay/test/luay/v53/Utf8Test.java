@@ -1,6 +1,6 @@
 package luay.test.luay.v53;
 
-import luay.test.luay.luayTestCase;
+import luay.test.luayTestCase;
 import org.junit.jupiter.api.Test;
 
 public class Utf8Test extends luayTestCase

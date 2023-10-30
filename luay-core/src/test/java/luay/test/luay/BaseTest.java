@@ -1,10 +1,10 @@
 package luay.test.luay;
 
+import luay.test.luayTestCase;
 import org.junit.jupiter.api.Test;
 
 public class BaseTest extends luayTestCase
 {
-
     @Test
     void testMain()
     {

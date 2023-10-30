@@ -30,6 +30,7 @@ public class SnmpLib extends AbstractLibrary implements LuayLibraryFactory
                 _varArgFunctionWrapper.from("snmpv2",SnmpLib::_createSnmpSession),
                 _varArgFunctionWrapper.from("close",SnmpLib::_close),
                 _varArgFunctionWrapper.from("closeall",SnmpLib::_closeAll),
+                _varArgFunctionWrapper.from("oid",SnmpLib::_oid),
                 _varArgFunctionWrapper.from("get",SnmpLib::_get),
                 _varArgFunctionWrapper.from("getall",SnmpLib::_getall),
                 _varArgFunctionWrapper.from("walk",SnmpLib::_walk),
@@ -51,6 +52,16 @@ public class SnmpLib extends AbstractLibrary implements LuayLibraryFactory
             return LuaBoolean.valueOf(true);
         }
         return LuaBoolean.valueOf(false);
+    }
+
+    public static Varargs _oid(Varargs _args)
+    {
+        StringBuilder _sb = new StringBuilder();
+        for(int _i = 0; _i< _args.narg(); _i++)
+        {
+            _sb.append(String.format(".%d", _args.checkint(_i+1)));
+        }
+        return LuaValue.valueOf(_sb.toString());
     }
 
     public static Varargs _closeAll(Varargs _args)

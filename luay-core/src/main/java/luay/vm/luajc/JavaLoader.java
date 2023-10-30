@@ -47,10 +47,22 @@ public class JavaLoader extends ClassLoader {
 
 	public LuaFunction load(String classname, LuaValue env) {
 		try {
-			Class c = loadClass(classname);
-			LuaFunction v = (LuaFunction) c.newInstance();
-			v.initupvalue1(env);
-			return v;
+			if(true)
+			{
+				Class c = loadClass(classname);
+				Object ov = c.newInstance();
+				LuaFunction v = (LuaFunction) ov;
+				v.initupvalue1(env);
+				return v;
+			}
+			else
+			{
+				Class c = loadClass(classname);
+				Object ov = c.newInstance();
+				LuaFunction v = (LuaFunction) ov;
+				v.initupvalue1(env);
+				return v;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new IllegalStateException("bad class gen: " + e);

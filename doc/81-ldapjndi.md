@@ -11,3 +11,5 @@ Read-only Ldap access via JNDI.
 *   `ldapjndi.get(session. dn [, a1, ..., aN]) -> map`
 *   `ldapjndi.search(session. basedn, filter [, scope, a1, ..., aN]) -> list of maps`
 *   `ldapjndi.authdn(session. dn, pw [, mode]) -> bool`
+
+\pagebreak

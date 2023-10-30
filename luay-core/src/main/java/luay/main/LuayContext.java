@@ -1,9 +1,8 @@
 package luay.main;
 
 import lombok.SneakyThrows;
-import luay.vm.LuaTable;
-import luay.vm.LuaValue;
-import luay.vm.Prototype;
+import luay.vm.*;
+import luay.vm.lib.PackageLib;
 import luay.vm.lib.java.CoerceJavaToLua;
 import luay.vm.lib.java.CoerceLuaToJava;
 
@@ -20,7 +19,11 @@ public class LuayContext {
     private Prototype script;
     private String scriptName;
 
-    public LuayContext(LuayGlobal _globals) {
+    private String basePath;
+    private String baseFile;
+
+    public LuayContext(LuayGlobal _globals)
+    {
         this.globals = _globals;
     }
 
@@ -51,6 +54,7 @@ public class LuayContext {
     @SneakyThrows
     public Object execute(File _file)
     {
+        setBase(_file);
         return execute(new FileReader(_file), _file.getName());
     }
 
@@ -77,6 +81,11 @@ public class LuayContext {
                 _env.set(_entry.getKey(), CoerceJavaToLua.coerce(_entry.getValue()));
             }
 
+            _env.set("__FILE__", this.baseFile==null ? LuaValue.NIL : LuaString.valueOf(this.baseFile));
+            _env.set("__PATH__", this.basePath==null ? LuaValue.NIL : LuaString.valueOf(this.basePath));
+
+            checkBaseIncludePath(this.basePath, this.globals);
+
             LuaValue _chunk = this.globals.load(_reader, _name, _env);
 
             LuaValue _ret = _chunk.call();
@@ -92,9 +101,31 @@ public class LuayContext {
         }
     }
 
+    private void checkBaseIncludePath(String _basePath, LuayGlobal _globals)
+    {
+        StringBuilder _sb = new StringBuilder();
+        if(_basePath!=null)
+        {
+            _sb.append(_basePath+"/?.lua;");
+            _sb.append(_basePath+"/?/init.lua");
+            String _spath = _globals.getPackageLib().getLuaPath();
+            if(!_spath.startsWith(_sb.toString()))
+            {
+                _globals.getPackageLib().addLuaPath(_sb.toString());
+            }
+        }
+    }
+
+    public void setBase(File _file)
+    {
+        this.baseFile = _file == null ? null : _file.getAbsolutePath();
+        this.basePath = _file == null ? null : (_file.getParentFile() == null ? null : _file.getParentFile().getAbsolutePath());
+    }
+
     @SneakyThrows
     public void compileScript(File _file)
     {
+        setBase(_file);
         compileScript(new FileReader(_file), _file.getName());
     }
 
@@ -136,6 +167,11 @@ public class LuayContext {
                 _env.set(_entry.getKey(), CoerceJavaToLua.coerce(_entry.getValue()));
             }
 
+            _env.set("__FILE__", this.baseFile==null ? LuaValue.NIL : LuaString.valueOf(this.baseFile));
+            _env.set("__PATH__", this.basePath==null ? LuaValue.NIL : LuaString.valueOf(this.basePath));
+
+            checkBaseIncludePath(this.basePath, this.globals);
+
             return runScript(_env);
         }
         finally
@@ -152,7 +188,6 @@ public class LuayContext {
         }
     }
 
-    @SneakyThrows
     public Object runScript(LuaTable _env)
     {
         try
@@ -167,6 +202,11 @@ public class LuayContext {
             if(_ret.isnil()) return null;
 
             return CoerceLuaToJava.coerce(_ret, Object.class);
+        }
+        catch(Throwable _th)
+        {
+            _th.getMessage();
+            return _th;
         }
         finally
         {

@@ -24,12 +24,8 @@ package luay.vm.lib;
 import java.io.InputStream;
 import java.nio.file.FileSystems;
 
-import luay.vm.Globals;
-import luay.vm.LuaFunction;
-import luay.vm.LuaString;
-import luay.vm.LuaTable;
-import luay.vm.LuaValue;
-import luay.vm.Varargs;
+import luay.vm.*;
+import luay.vm.lib.java.CoerceJavaToLua;
 import luay.vm.lib.java.JsePlatform;
 import luay.lib.LuayLibraryFactory;
 import luay.lib.LuaySimpleLibraryFactory;
@@ -100,6 +96,7 @@ public class PackageLib extends TwoArgFunction {
 	 * <code>"?.luay.main.lua"</code> by default.
 	 */
 	public static final String DEFAULT_LUA_PATH;
+
 	static {
 		String path = null;
 		try {
@@ -119,9 +116,11 @@ public class PackageLib extends TwoArgFunction {
 	static final LuaString         _PATH       = valueOf("path");
 	static final LuaString         _SEARCHPATH = valueOf("searchpath");
 	static final LuaString         _SEARCHERS  = valueOf("searchers");
+	static final LuaString         _LIB_SEARCHERS  = valueOf("lib_searchers");
 	static final LuaString         _SEEALL     = valueOf("seeall");
+    public boolean noDefaultSearchPaths = false;
 
-	/** The globals that were used to load this library. */
+    /** The globals that were used to load this library. */
 	Globals globals;
 
 	/** The table for this package. */
@@ -166,6 +165,7 @@ public class PackageLib extends TwoArgFunction {
 	public LuaValue call(LuaValue modname, LuaValue env) {
 		globals = env.checkglobals();
 		globals.set("require", new require());
+
 		package_ = new LuaTable();
 		package_.set(_LOADED, new LuaTable());
 		package_.set(_PRELOAD, new LuaTable());
@@ -173,16 +173,29 @@ public class PackageLib extends TwoArgFunction {
 		package_.set(_LOADLIB, new loadlib());
 		package_.set(_SEARCHPATH, new searchpath());
 		package_.set(_SEEALL, new seeall());
+
 		LuaTable searchers = new LuaTable();
 		searchers.set(1, preload_searcher = new preload_searcher());
 		searchers.set(2, luay_searcher = new luay_searcher());
 		searchers.set(3, java_searcher = new java_searcher());
 		searchers.set(4, lua_searcher = new lua_searcher());
 		package_.set(_SEARCHERS, searchers);
+
 		package_.set("config", FILE_SEP + "\n;\n?\n!\n-\n");
+
 		package_.get(_LOADED).set("package", package_);
 		env.set("package", package_);
 		globals.package_ = this;
+
+		// --- LUAY EXTENSIONS
+		LuaTable lib_searchers = new LuaTable();
+		lib_searchers.set(1, luay_searcher);
+		lib_searchers.set(2, java_searcher);
+		package_.set(_LIB_SEARCHERS, lib_searchers);
+
+		package_.set("addpath", new addpath());
+		package_.set("getpath", new getpath());
+
 		return env;
 	}
 
@@ -197,6 +210,14 @@ public class PackageLib extends TwoArgFunction {
 	 */
 	public void setLuaPath(String newLuaPath) {
 		package_.set(_PATH, LuaValue.valueOf(newLuaPath));
+	}
+
+	public String getLuaPath() {
+		return package_.get(_PATH).checkjstring();
+	}
+
+	public void addLuaPath(String newLuaPath) {
+		package_.set(_PATH, LuaValue.valueOf(newLuaPath+";"+package_.get(_PATH).checkjstring()));
 	}
 
 	@Override
@@ -279,11 +300,48 @@ public class PackageLib extends TwoArgFunction {
 		}
 	}
 
-	public static class loadlib extends VarArgFunction {
+	public class loadlib extends VarArgFunction {
 		@Override
 		public Varargs invoke(Varargs args) {
-			args.checkstring(1);
-			return varargsOf(NIL, valueOf("dynamic libraries not enabled"), valueOf("absent"));
+			if(args.narg()==2) {
+				return varargsOf(NIL, valueOf("dynamic libraries not enabled"), valueOf("absent"));
+			}
+
+			LuaString name = args.checkstring(1);
+			LuaValue loaded = package_.get(_LOADED);
+			LuaValue result = loaded.get(name);
+			if (result.toboolean()) {
+				if (result == _SENTINEL)
+					error("loop or previous error loading module '" + name + "'");
+				return result;
+			}
+
+			/* else must load it; iterate over available loaders */
+			LuaTable tbl = package_.get(_LIB_SEARCHERS).checktable();
+			StringBuffer sb = new StringBuffer();
+			Varargs loader = null;
+			for (int i = 1; true; i++) {
+				LuaValue searcher = tbl.get(i);
+				if (searcher.isnil()) {
+					return varargsOf(NIL, valueOf("dynamic libraries not enabled"), valueOf("absent"));
+				}
+
+				/* call loader with module name as argument */
+				loader = searcher.invoke(name);
+				if (loader.isfunction(1))
+					break;
+				if (loader.isstring(1))
+					sb.append(loader.tojstring(1));
+			}
+
+			// load the module using the loader
+			loaded.set(name, _SENTINEL);
+			result = loader.arg1().call(name, loader.arg(2));
+			if (!result.isnil())
+				loaded.set(name, result);
+			else if ((result = loaded.get(name)) == _SENTINEL)
+				loaded.set(name, result = LuaValue.TRUE);
+			return result;
 		}
 	}
 
@@ -347,10 +405,10 @@ public class PackageLib extends TwoArgFunction {
 				String template = path.substring(b, e);
 
 				// create filename
-				int q = template.indexOf('?');
+				int q = -1;
 				String filename = template;
-				if (q >= 0) {
-					filename = template.substring(0, q)+name+template.substring(q+1);
+				while((q = filename.indexOf('?'))>=0) {
+					filename = filename.substring(0, q)+name+filename.substring(q+1);
 				}
 
 				// try opening the file
@@ -388,10 +446,19 @@ public class PackageLib extends TwoArgFunction {
 			String name = args.checkjstring(1);
 			String classname = toClassname(name);
 			Class c = null;
+			Object o = null;
 			LuaValue v = null;
 			try {
 				c = Class.forName(classname);
-				v = (LuaValue) c.newInstance();
+				o = c.newInstance();
+
+				// --- LUAY AUTO COERCE BEGIN
+				if(!(o instanceof LuaValue)) {
+					o = CoerceJavaToLua.coerce(o);
+				}
+				// --- LUAY AUTO COERCE END
+
+				v = (LuaValue) o;
 				if (v.isfunction())
 					((LuaFunction) v).initupvalue1(globals);
 				return varargsOf(v, globals);
@@ -405,32 +472,25 @@ public class PackageLib extends TwoArgFunction {
 
 	public class luay_searcher extends VarArgFunction {
 		@Override
-		public Varargs invoke(Varargs args)
-		{
+		public Varargs invoke(Varargs args) {
 			String name = args.checkjstring(1);
 			try {
 				LuaValue _lib = (LuaValue) LuayLibraryFactory.load(name);
-				if(_lib==null)
-				{
+				if(_lib==null) {
 					LuaValue _jlib = LuaySimpleLibraryFactory.load(name);
-					if(_jlib != null)
-					{
+					if(_jlib != null) {
 						_lib = _jlib;
 					}
 				}
 
-				if(_lib != null)
-				{
-					if (_lib.isfunction())
-					{
+				if(_lib != null) {
+					if (_lib.isfunction()) {
 						((LuaFunction) _lib).initupvalue1(globals);
 					}
 					return varargsOf(_lib, globals);
 				}
 				return valueOf("\n\tno lib '" + name + "'");
-			}
-			catch (Exception _xe)
-			{
+			} catch (Exception _xe) {
 				return valueOf("\n\tluay factory load failed on '" + name + "', " + _xe);
 			}
 		}
@@ -460,12 +520,88 @@ public class PackageLib extends TwoArgFunction {
 		if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9')
 			return true;
 		switch (c) {
-		case '.':
-		case '$':
-		case '_':
-			return true;
-		default:
-			return false;
+			case '.':
+			case '$':
+			case '_':
+				return true;
+			default:
+				return false;
 		}
 	}
+
+	public class addpath extends VarArgFunction {
+		@Override
+		public Varargs invoke(Varargs args) {
+			StringBuilder _path = new StringBuilder();
+
+			_path.append(package_.get(_PATH).checkjstring());
+
+			for(int _i=args.narg(); _i>0; _i--) {
+				String _n = args.checkjstring(_i);
+				if(_n.contains("?")) {
+					_path.insert(0,(_n+";"));
+				} else {
+					_path.insert(0,(_n+"/?/init.lua;"));
+					_path.insert(0,(_n+"/?.lua;"));
+				}
+			}
+
+			package_.set(_PATH, LuaValue.valueOf(_path.toString()));
+
+			return varargsOf(NIL, valueOf(_path.toString()));
+		}
+	}
+
+	public class setpath extends VarArgFunction {
+		@Override
+		public Varargs invoke(Varargs args)
+		{
+			if(args.narg()>0)
+			{
+				StringBuilder _path = new StringBuilder();
+
+				for (int _i = args.narg(); _i > 0; _i--)
+				{
+					String _n = args.checkjstring(_i);
+					if (_n.contains("?"))
+					{
+						_path.insert(0, (_n + ";"));
+					}
+					else
+					{
+						_path.insert(0, (_n + "/?/init.lua;"));
+						_path.insert(0, (_n + "/?.lua;"));
+					}
+				}
+
+				if(!noDefaultSearchPaths)
+				{
+					_path.append("./?.lua;./?/init.lua");
+					_path.append(";?.lua;?/init.lua");
+				}
+				else
+				{
+					_path.setLength(_path.length()-1);
+				}
+
+				package_.set(_PATH, LuaValue.valueOf(_path.toString()));
+
+				return varargsOf(NIL, valueOf(_path.toString()));
+			}
+			return NIL;
+		}
+	}
+
+	public class getpath extends VarArgFunction {
+		@Override
+		public Varargs invoke(Varargs args) {
+			LuaList _l = new LuaList();
+
+			for(String _p : package_.get(_PATH).checkjstring().split(";")) {
+				_l.insert(0, LuaValue.valueOf(_p));
+			}
+			return _l;
+		}
+	}
+
 }

@@ -26,4 +26,10 @@ Refer: http://www.lua.org/manual/5.2/manual.html#6.8
 *   `file:setvbuf (mode [, size])`
 *   `file:write (···)`
 
+### Luay Extensions
+
+*   `io.loadasstring(file[, mode]) -> string, err`
+*   `io.loadastable(file[, mode]) -> list, err`
+
+
 \pagebreak

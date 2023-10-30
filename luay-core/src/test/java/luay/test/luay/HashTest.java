@@ -1,5 +1,6 @@
 package luay.test.luay;
 
+import luay.test.luayTestCase;
 import org.junit.jupiter.api.Test;
 
 public class HashTest extends luayTestCase
@@ -8,7 +9,7 @@ public class HashTest extends luayTestCase
     @Test
     void testMain()
     {
-        this.luayContext.compileScript(luayTestCase.getStream("luay/hash.lua"), "luay/hash.lua");
+        this.luayContext.compileScript(luayTestCase.getAsStream("luay/hash.lua"), "luay/hash.lua");
 
         this.luayContext.set("_var", "\u007fS3cr3t789");
 
