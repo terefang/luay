@@ -1,10 +1,7 @@
 package luay.lib.ext;
 
 import lombok.SneakyThrows;
-import luay.vm.LuaFunction;
-import luay.vm.LuaTable;
-import luay.vm.LuaValue;
-import luay.vm.Varargs;
+import luay.vm.*;
 import luay.vm.lib.TwoArgFunction;
 import luay.vm.lib.VarArgFunction;
 import luay.lib.LuayLibrary;
@@ -270,10 +267,17 @@ public abstract class AbstractLibrary extends TwoArgFunction implements LuayLibr
 			string.set(_n, (LuaValue) _fn);
 		}
 
+		customizeLibraryPackage(this.getLibraryName(), string);
+
 		env.set(this.getLibraryName(), string);
 
 		if (!env.get("package").isnil()) env.get("package").get("loaded").set(this.getLibraryName(), string);
 
 		return string;
+	}
+
+	public void customizeLibraryPackage(String _pname, LuaTable _package)
+	{
+
 	}
 }

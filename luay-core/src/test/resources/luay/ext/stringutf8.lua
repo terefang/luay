@@ -121,6 +121,8 @@ assert(_utf.replace('abc', _t, "abc", "a", {['a']='b'}) == 'bbbbb')
 --   `utf8.substr (s, n [, i]) -> string`
 --   `utf8.indexof (s, n [, i]) -> int/nil`
 --   `utf8.lastindexof (s, n [, i]) -> int/nil`
+--   `utf8.indexofany (s, n [,...]) -> int/nil`
+--   `utf8.lastindexofany (s, n [,...]) -> int/nil`
 --   `utf8.lower (s) -> string`
 --   `utf8.upper (s) -> string`
 --   `utf8.contains(hay, needle) -> boolean`
@@ -132,3 +134,4 @@ assert(_utf.replace('abc', _t, "abc", "a", {['a']='b'}) == 'bbbbb')
 --   `utf8.striptrailing(hay) -> string`
 --   `utf8.stripleading(hay) -> string`
 --   `utf8.rxreplace(string, rx, to) -> string`
+--   `utf8.rxreplaceall(string, rx, to) -> string`

@@ -62,6 +62,18 @@ public class LuayHelper
             }
             return tableToJavaMap((LuaTable) _value);
         }
+        else if(_value instanceof LuaBoolean)
+        {
+            return _value.checkboolean();
+        }
+        else if(_value instanceof LuaDouble)
+        {
+            return _value.checkdouble();
+        }
+        else if(_value instanceof LuaInteger)
+        {
+            return _value.checklong();
+        }
         else
         if(_value.isboolean())
         {
@@ -87,7 +99,7 @@ public class LuayHelper
         {
             return _value.checkjstring();
         }
-        return null;
+        return _value.toString();
     }
 
     public static LuaTable varargsToTable(Varargs _args)

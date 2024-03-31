@@ -21,6 +21,8 @@
 ******************************************************************************/
 package luay.vm;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Class to encapsulate varargs values, either as part of a variable argument
  * list, or multiple return values.
@@ -450,6 +452,7 @@ public abstract class Varargs {
 	 * @exception LuaError if the argument is not a string or number
 	 */
 	public String checkjstring(int i) { return arg(i).checkjstring(); }
+	public byte[] checkjbytes(int i) { return arg(i).checkjbytes(); }
 
 	/**
 	 * Return argument i as a LuaString if a string or number, or throw an error
@@ -625,6 +628,11 @@ public abstract class Varargs {
 	 */
 	public String tojstring(int i) { return arg(i).tojstring(); }
 
+	public byte[] tojbytes(int i)
+	{
+		return arg(i).tojbytes();
+	}
+
 	/**
 	 * Return argument i as a java short value, discarding any fractional part
 	 * and truncating, or 0 if not a number.
@@ -671,6 +679,10 @@ public abstract class Varargs {
 		return sb.tojstring();
 	}
 
+	public byte[] tojbytes()
+	{
+		return tojstring().getBytes(StandardCharsets.UTF_8);
+	}
 	/**
 	 * Convert the value or values to a java String using Varargs.tojstring()
 	 *

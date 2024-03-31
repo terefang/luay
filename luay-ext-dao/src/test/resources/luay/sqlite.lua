@@ -18,6 +18,26 @@ print('res=', stringify(_res),_);
 
 _res, _ = _conn:query('select * from tbl');
 print('res=', stringify(_res),_);
+for _,_row in ipairs(_res) do
+    print(_)
+end
 
+_res, _ = _conn:query('select * from tbl where id = ?{id}', mkmap('id', 1));
+print('res=', stringify(_res),_);
+for _,_row in ipairs(_res) do
+    print(_)
+end
+
+_res, _ = _conn:query('select * from tbl where id = ?', 1);
+print('res=', stringify(_res),_);
+for _,_row in ipairs(_res) do
+    print(_)
+end
 
 _conn:close();
+
+local _list = _sql.drivers();
+
+for _, n in ipairs(_list) do
+    print(n)
+end

@@ -1,9 +1,9 @@
 local getopt = require 'getopt'
 
 -- *********************************************************************************
-local _l42 = list('--alpha=1', '--alpha=2', '--alpha=3','a1','a2','a3')
-local _l41 = list('--alpha','--beta','a1','a2','a3')
-local _list4 = list(_l41,_l42)
+local _l42 = mklist('--alpha=1', '--alpha=2', '--alpha=3','a1','a2','a3')
+local _l41 = mklist('--alpha','--beta','a1','a2','a3')
+local _list4 = mklist(_l41,_l42)
 
 print()
 print('getopt','---', 'simplext')
@@ -23,47 +23,47 @@ end
 
 -- *********************************************************************************
 
-local _alist = list('CN:xv:f', '+CN:xv:f', '-CN:xv:f', ':CN:xv:f', ':+CN:xv:f');
+local _alist = mklist('CN:xv:f', '+CN:xv:f', '-CN:xv:f', ':CN:xv:f', ':+CN:xv:f');
 
 -- *********************************************************************************
 
-local _list2 = list(
-        list('-N','some','--','-defaults','a1','a2','a3'),
-        list('-N','some','-defaults','a1','a2','a3'),
-        list("-C",'a1','a2','a3'),
-        list("-C",'a1','--','a2','a3'),
-        list('a1','a2',"-C",'a3'),
-        list('a1','a2','--',"-C",'a3'),
-        list('-xvf','/tmp','a1','a2','a3'),
-        list('--','-xvf','/tmp','a1','a2','a3'),
-        list('a1','a2','a3','-xvf','/tmp'),
-        list('a1','a2','a3','--','-xvf','/tmp'),
-        list('-DEFAULTS','a1','a2','a3'),
-        list('--','-DEFAULTS','a1','a2','a3'),
-        list('a1','-DEFAULTS','a2','a3'),
-        list('a1','--','-DEFAULTS','a2','a3')
+local _list2 = mklist(
+        mklist('-N','some','--','-defaults','a1','a2','a3'),
+        mklist('-N','some','-defaults','a1','a2','a3'),
+        mklist("-C",'a1','a2','a3'),
+        mklist("-C",'a1','--','a2','a3'),
+        mklist('a1','a2',"-C",'a3'),
+        mklist('a1','a2','--',"-C",'a3'),
+        mklist('-xvf','/tmp','a1','a2','a3'),
+        mklist('--','-xvf','/tmp','a1','a2','a3'),
+        mklist('a1','a2','a3','-xvf','/tmp'),
+        mklist('a1','a2','a3','--','-xvf','/tmp'),
+        mklist('-DEFAULTS','a1','a2','a3'),
+        mklist('--','-DEFAULTS','a1','a2','a3'),
+        mklist('a1','-DEFAULTS','a2','a3'),
+        mklist('a1','--','-DEFAULTS','a2','a3')
 );
 
 -- *********************************************************************************
 
-local _list = list(
-        list("-C",'a1','a2','a3'),
-        list('a1','a2','a3',"-C"),
-        list('--defaults','a1','a2','a3'),
-        list('a1','a2','a3','--defaults'),
-        list('--default=/tmp','a1','a2','a3'),
-        list('a1','a2','a3','--default=/tmp'),
-        list('-D/tmp','a1','a2','a3'),
-        list('a1','a2','a3','-D/tmp'),
-        list('+F','a1','a2','a3'),
-        list('a1','a2','a3','+F'),
-        list('-gafl=URKS','a1','a2','a3'),
-        list('a1','a2','a3','-gafl=URKS'),
-        list('--','-DEFAULTS','a1','a2','a3'),
-        list('a1','a2','a3','--','-DEFAULTS'),
-        list('-DEFAULTS','--','a1','a2','a3'),
-        list('a1','a2','a3','-DEFAULTS'),
-        list('a1','a2','a3','-DEFAULTS')
+local _list = mklist(
+        mklist("-C",'a1','a2','a3'),
+        mklist('a1','a2','a3',"-C"),
+        mklist('--defaults','a1','a2','a3'),
+        mklist('a1','a2','a3','--defaults'),
+        mklist('--default=/tmp','a1','a2','a3'),
+        mklist('a1','a2','a3','--default=/tmp'),
+        mklist('-D/tmp','a1','a2','a3'),
+        mklist('a1','a2','a3','-D/tmp'),
+        mklist('+F','a1','a2','a3'),
+        mklist('a1','a2','a3','+F'),
+        mklist('-gafl=URKS','a1','a2','a3'),
+        mklist('a1','a2','a3','-gafl=URKS'),
+        mklist('--','-DEFAULTS','a1','a2','a3'),
+        mklist('a1','a2','a3','--','-DEFAULTS'),
+        mklist('-DEFAULTS','--','a1','a2','a3'),
+        mklist('a1','a2','a3','-DEFAULTS'),
+        mklist('a1','a2','a3','-DEFAULTS')
 );
 
 -- *********************************************************************************
@@ -101,17 +101,17 @@ end
 
 -- *********************************************************************************
 
-local _list3 = list(
-        list('--alpha','--beta', "some"),
-        list('--beta', '--alpha', "some"),
-        list('--beta', '--', '--alpha', "some"),
-        list('--beta', '--alpha', '--',  "some"),
-        list('--alpha', '--', '--beta', "some"),
-        list('--alpha', '--beta', '--',  "some")
+local _list3 = mklist(
+        mklist('--alpha','--beta', "some"),
+        mklist('--beta', '--alpha', "some"),
+        mklist('--beta', '--', '--alpha', "some"),
+        mklist('--beta', '--alpha', '--',  "some"),
+        mklist('--alpha', '--', '--beta', "some"),
+        mklist('--alpha', '--beta', '--',  "some")
 );
 
 print()
-local _lopts = map('alpha',0,'beta',1);
+local _lopts = mkmap('alpha',0,'beta',1);
 
 for _, _sarg in ipairs(_alist) do
     print()

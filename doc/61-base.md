@@ -31,8 +31,8 @@ Refer: http://www.lua.org/manual/5.2/manual.html#6.1
 *   `stringify (string[, type])`
 *   `printf (···)`
 *   `apairs(v1[,...,vN]) -> iterator, list, 0` — inspired from idle-lang
-*   `list(value[, value ...]) -> list-only-table`
-*   `map(key1, value1 [, keyN, valueN ...]) -> map-only-table`
+*   `mklist(value[, value ...]) -> list-only-table`
+*   `mkmap(key1, value1 [, keyN, valueN ...]) -> map-only-table`
 
 *   `__FILE__` — filepath of the initial executed script, if available.
 *   `__PATH__` — path containing the initial executed script, if available.

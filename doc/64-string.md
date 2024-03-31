@@ -78,4 +78,16 @@ Refer: http://www.lua.org/manual/5.3/manual.html#6.4.2
 *   `string.sformat(fmt, v1[,...,vN]) -> string` \
     Java String.format
 
+* `string.to_int (string [, default]) -> long`
+* `string.to_long (string [, default]) -> long`
+* `string.to_bool (string [, default]) -> boolean`
+* `string.to_float (string [, default]) -> double`
+* `string.to_double (string [, default]) -> double`
+
 \pagebreak
+
+TODO
+
+decformat - #.##
+octformat - 1.45 MiB
+isoformat - 2.34 M

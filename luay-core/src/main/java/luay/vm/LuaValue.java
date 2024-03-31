@@ -1116,6 +1116,7 @@ abstract public class LuaValue extends Varargs {
 	 * @see #TSTRING
 	 */
 	public String checkjstring() { argerror("string"); return null; }
+	public byte[] checkjbytes() { argerror("string"); return null; }
 
 	/**
 	 * Check that this is a luay.main.lua string, or throw {@link LuaError} if it is not.
@@ -3677,7 +3678,10 @@ abstract public class LuaValue extends Varargs {
 	 * @return {@link LuaString} instance, possibly pooled, whose bytes are
 	 *         those in the supplied array
 	 */
-	public static LuaString valueOf(byte[] bytes) { return LuaString.valueOf(bytes); }
+	public static LuaString valueOf(byte[] bytes) {
+		if(bytes==null) return LuaString.valueOf("");
+		return LuaString.valueOf(bytes);
+	}
 
 	/**
 	 * Convert bytes in an array to a {@link LuaValue}.

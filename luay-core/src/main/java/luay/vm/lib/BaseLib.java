@@ -23,8 +23,6 @@ package luay.vm.lib;
 
 import java.io.*;
 
-import luay.lib.ext.AbstractLibrary;
-import luay.lib.ext.zdf.ArrayLib;
 import luay.main.LuayHelper;
 import luay.vm.*;
 
@@ -132,8 +130,8 @@ public class BaseLib extends TwoArgFunction implements ResourceFinder {
 		env.set("printf", new printf());
 		env.set("apairs", new apairs());
 
-		env.set("map", new _map());
-		env.set("list", new _list());
+		env.set("mkmap", new _map());
+		env.set("mklist", new _list());
 		return env;
 	}
 
@@ -307,7 +305,16 @@ public class BaseLib extends TwoArgFunction implements ResourceFinder {
 				if (i > 1)
 					globals.STDOUT.print('\t');
 				LuaString s = tostring.call(args.arg(i)).strvalue();
-				globals.STDOUT.print(s.tojstring());
+				String _s = null;
+				try
+				{
+					_s = s.tojstring();
+				}
+				catch (Exception _xe)
+				{
+					_s = new String(s.tojbytes());
+				}
+				globals.STDOUT.print(_s);
 			}
 			globals.STDOUT.print('\n');
 			globals.STDOUT.flush();
@@ -668,7 +675,7 @@ public class BaseLib extends TwoArgFunction implements ResourceFinder {
 	}
 
 	// --- Luay Extensions
-	// map(...)
+	// mkmap(...)
 	final class _map extends VarArgFunction {
 
 		_map() {}
@@ -681,7 +688,7 @@ public class BaseLib extends TwoArgFunction implements ResourceFinder {
 	}
 
 	// --- Luay Extensions
-	// list(...)
+	// mklist(...)
 	final class _list extends VarArgFunction {
 
 		_list() {}

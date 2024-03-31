@@ -29,7 +29,7 @@ import luay.vm.Varargs;
 import java.util.Iterator;
 import java.util.Map;
 
-class JavaMap extends LuaUserdata
+public class JavaMap extends LuaUserdata
 {
 	JavaMap(Object instance) {
 		super(instance);

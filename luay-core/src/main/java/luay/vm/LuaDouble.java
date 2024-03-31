@@ -78,14 +78,25 @@ public class LuaDouble extends LuaNumber {
 	/** The value being held by this instance. */
 	final double v;
 
+	boolean forceDouble = false;
+
 	public static LuaNumber valueOf(double d) {
 		int id = (int) d;
 		return d == id? (LuaNumber) LuaInteger.valueOf(id): (LuaNumber) new LuaDouble(d);
 	}
 
+	public static LuaNumber valueFrom(double d) {
+		return (LuaNumber) new LuaDouble(d, true);
+	}
+
 	/** Don't allow ints to be boxed by DoubleValues */
 	private LuaDouble(double d) {
 		this.v = d;
+	}
+
+	private LuaDouble(double d, boolean force) {
+		this.v = d;
+		this.forceDouble = force;
 	}
 
 	@Override
@@ -96,7 +107,7 @@ public class LuaDouble extends LuaNumber {
 
 	@Override
 	public boolean islong() {
-		return v == (long) v;
+		return this.forceDouble ? false : (v == (long) v);
 	}
 
 	@Override
@@ -124,16 +135,16 @@ public class LuaDouble extends LuaNumber {
 	public double optdouble(double defval) { return v; }
 
 	@Override
-	public int optint(int defval) { return (int) (long) v; }
+	public int optint(int defval) { return (int) v; }
 
 	@Override
-	public LuaInteger optinteger(LuaInteger defval) { return LuaInteger.valueOf((int) (long) v); }
+	public LuaInteger optinteger(LuaInteger defval) { return LuaInteger.valueOf((long) v); }
 
 	@Override
 	public long optlong(long defval) { return (long) v; }
 
 	@Override
-	public LuaInteger checkinteger() { return LuaInteger.valueOf((int) (long) v); }
+	public LuaInteger checkinteger() { return LuaInteger.valueOf((long) v); }
 
 	// unary operators
 	@Override
@@ -430,7 +441,7 @@ public class LuaDouble extends LuaNumber {
 
 	@Override
 	public boolean isstring() {
-		return true;
+		return !this.forceDouble;
 	}
 
 	@Override

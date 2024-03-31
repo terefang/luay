@@ -26,7 +26,7 @@ import luay.vm.lib.OneArgFunction;
 
 import java.util.List;
 
-class JavaList extends LuaUserdata {
+public class JavaList extends LuaUserdata {
 
 	private static final class LenFunction extends OneArgFunction {
 		@Override

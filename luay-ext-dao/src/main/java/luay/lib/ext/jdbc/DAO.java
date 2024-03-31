@@ -259,7 +259,7 @@ public class DAO implements AutoCloseable
                 _statement.setObject(_i, _bind.get(_i - 1));
             }
 
-            try (ResultSet _rs = _statement.executeQuery(_query);) {
+            try (ResultSet _rs = _statement.executeQuery();) {
                 return _proc.processResultSet(_dao, _statement, _rs);
             }
         }
@@ -313,7 +313,7 @@ public class DAO implements AutoCloseable
                 _statement.setObject(_i, _bind.get(_i - 1));
             }
 
-            try (ResultSet _rs = _statement.executeQuery(_query);) {
+            try (ResultSet _rs = _statement.executeQuery();) {
                 return _proc.processResultSet(_dao, _statement, _rs);
             }
         }

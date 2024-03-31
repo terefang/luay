@@ -6,18 +6,14 @@
     <parent>
         <groupId>com.github.terefang.luay</groupId>
         <artifactId>luay</artifactId>
-        <version>2023.10.231</version>
+        <version>2023.12.240</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>luay-gui</artifactId>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <timestamp>${maven.build.timestamp}</timestamp>
-        <maven.build.timestamp.format>yyyyMMdd'+'HHmm</maven.build.timestamp.format>
+
     </properties>
 
     <dependencies>
@@ -44,11 +40,6 @@
             <version>1.7.29</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.swinglabs.swingx</groupId>
-            <artifactId>swingx-all</artifactId>
-            <version>1.6.5-1</version>
-        </dependency>
 
         <!--	https://github.com/jidesoft/jide-oss
 				https://mvnrepository.com/artifact/com.jidesoft/jide-oss -->
@@ -58,12 +49,18 @@
             <version>3.6.18</version>
         </dependency>
 
-        <!-- https://github.com/jonestimd/swing-extensions -->
+        <!-- https://github.com/jonestimd/swing-extensions
         <dependency>
             <groupId>io.github.jonestimd</groupId>
             <artifactId>swing-extensions</artifactId>
             <version>1.4.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.swinglabs.swingx</groupId>
+            <artifactId>swingx-all</artifactId>
+            <version>1.6.5-1</version>
+        </dependency>
+         -->
         <dependency>
             <groupId>com.fifesoft</groupId>
             <artifactId>rsyntaxtextarea</artifactId>
@@ -72,6 +69,11 @@
         <dependency>
             <groupId>com.github.terefang.luay</groupId>
             <artifactId>luay-core</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.terefang.luay</groupId>
+            <artifactId>luay-ext-slf4j</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
@@ -91,8 +93,8 @@
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.36</version>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.7.29</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -217,29 +219,30 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <configuration>
-                    <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
-                            <resource>.SF</resource>
-                        </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
-                            <resource>.DSA</resource>
-                        </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                            <resource>META-INF/services/*</resource>
-                        </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                            <resource>META-INF/LICENSE</resource>
-                        </transformer>
-                    </transformers>
-                    <finalName>${artifactId}-${version}-shaded-full</finalName>
-                </configuration>
+                <version>3.5.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                                    <resource>.SF</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                                    <resource>.DSA</resource>
+                                </transformer>
+
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/LICENSE</resource>
+                                </transformer>
+                            </transformers>
+                            <finalName>${artifactId}-${version}-shaded-full</finalName>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -323,6 +326,20 @@ if %ERROR_CODE% NEQ 0 (pause)
 if %ERROR_CODE% NEQ 0 exit %ERROR_CODE%
 									]]></replacevalue>
                                 </replace>
+
+                                <concat destfile="${project.build.directory}/luay-gui.sh.bin" binary="true">
+                                    <fileset file="${project.basedir}/src/main/dist/stub.sh"/>
+                                    <fileset file="${project.build.directory}/${project.artifactId}-${project.version}-shaded-full.jar"/>
+                                </concat>
+                                <concat destfile="${project.build.directory}/luay-gui.bat" binary="true">
+                                    <fileset file="${project.basedir}/src/main/dist/stub.bat"/>
+                                    <fileset file="${project.build.directory}/${project.artifactId}-${project.version}-shaded-full.jar"/>
+                                </concat>
+                                <concat destfile="${project.build.directory}/luay-gui.debug.bat" binary="true">
+                                    <fileset file="src/main/dist/stub.bat"/>
+                                    <fileset file="${project.build.directory}/${project.artifactId}-${project.version}-shaded-full.jar"/>
+                                </concat>
+
                                 <zip destfile="${project.build.directory}/${artifactId}-${project.version}-${timestamp}.zip" compress="true">
                                     <zipfileset dir="${project.build.directory}/${artifactId}-assemble" prefix="${project.artifactId}-${project.version}"/>
                                 </zip>
@@ -330,6 +347,14 @@ if %ERROR_CODE% NEQ 0 exit %ERROR_CODE%
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
             </plugin>
         </plugins>
     </build>

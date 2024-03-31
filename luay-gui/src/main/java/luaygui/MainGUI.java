@@ -1,6 +1,8 @@
 package luaygui;
 
-import com.google.common.io.Files;
+import com.github.terefang.jmelange.commons.util.LdataUtil;
+import com.github.terefang.jmelange.commons.util.OsUtil;
+import com.github.terefang.jmelange.data.ldata.LdataParser;
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.swing.JideBoxLayout;
 import com.jidesoft.swing.JideButton;
@@ -9,16 +11,14 @@ import com.jidesoft.swing.JideTabbedPane;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import luay.ldata.LdataParser;
-import luay.ldata.LdataUtil;
 import luay.main.LuayBuilder;
 import luay.main.LuayContext;
 import luay.vm.LuaError;
 import org.apache.commons.io.IOUtils;
+import org.codehaus.plexus.util.FileUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
-import org.jdesktop.swingx.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -34,12 +34,18 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 
 @Slf4j
-public class MainGUI extends JXFrame
+public class MainGUI extends JFrame
 {
     public static MainGUI _INSTANCE;
     private JPanel panel;
@@ -59,8 +65,8 @@ public class MainGUI extends JXFrame
     private File _srcFile;
     private File _ctxFile;
     private File _argFile;
-    private List<JXTextField> _argList = new Vector<>();
-    private List<JXTextField> _argLabel = new Vector<>();
+    private List<JTextField> _argList = new Vector<>();
+    private List<JTextField> _argLabel = new Vector<>();
     private ImageIcon iIcon;
     private JLabel iArea;
     private JScrollPane iScrallPanel;
@@ -83,10 +89,10 @@ public class MainGUI extends JXFrame
     @SneakyThrows
     public void init()
     {
-        this.setStartPosition(StartPosition.CenterInScreen);
+        //this.setStartPosition(StartPosition.CenterInScreen);
         this.setSize(new Dimension(800,600));
 
-        this.panel = new JXPanel();
+        this.panel = new JPanel();
         this.panel.setLayout(new JideBoxLayout(this.panel, JideBoxLayout.Y_AXIS, 3));
         this.add(this.panel);
 
@@ -102,7 +108,7 @@ public class MainGUI extends JXFrame
     {
         this._tabbedPane = new JideTabbedPane();
         this.panel.add(this._tabbedPane);
-        JXPanel _panel = new JXPanel();
+        JPanel _panel = new JPanel();
         _panel.add(new JideButton(new AbstractAction("A↑") {
             @Override
             public void actionPerformed(ActionEvent e)
@@ -117,8 +123,15 @@ public class MainGUI extends JXFrame
             }
         }));
         this._tabbedPane.setTabLeadingComponent(_panel);
+        _panel.add(new JideButton(new AbstractAction("A←") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                MainGUI.this.handleDefaultFontSize();
+            }
+        }));
+        this._tabbedPane.setTabLeadingComponent(_panel);
 
-        _panel = new JXPanel();
+        _panel = new JPanel();
         _panel.add(new JButton(new AbstractAction("Reset") {
             @Override
             public void actionPerformed(ActionEvent e)
@@ -194,7 +207,7 @@ public class MainGUI extends JXFrame
         {
             Border _etch = BorderFactory.createEtchedBorder((EtchedBorder.LOWERED));
             TitledBorder _title = BorderFactory.createTitledBorder(_etch, "OUTPUT");
-            JXPanel _xpanel = new JXPanel();
+            JPanel _xpanel = new JPanel();
             _xpanel.setLayout(new JideBoxLayout(_xpanel));
             _xpanel.setBorder(_title);
             _xpanel.add(this._scroll);
@@ -209,7 +222,7 @@ public class MainGUI extends JXFrame
         {
             Border _etch = BorderFactory.createEtchedBorder((EtchedBorder.LOWERED));
             TitledBorder _title = BorderFactory.createTitledBorder(_etch, "CANVAS");
-            JXPanel _xpanel = new JXPanel();
+            JPanel _xpanel = new JPanel();
             _xpanel.setLayout(new JideBoxLayout(_xpanel));
             _xpanel.setBorder(_title);
             _xpanel.add(this.iScrallPanel);
@@ -217,15 +230,15 @@ public class MainGUI extends JXFrame
         }
 
         this._srcArea = new RSyntaxTextArea(50, 132);
-        this._srcArea.setEditable(true);
         this._srcArea.setFont(createEditFont());
+        this._srcArea.setEditable(true);
         this._srcArea.setAutoIndentEnabled(true);
-        this._srcArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_LUA);
+        this._srcArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
         this._srcArea.setText("");
         {
             Border _etch = BorderFactory.createEtchedBorder((EtchedBorder.LOWERED));
             TitledBorder _title = BorderFactory.createTitledBorder(_etch, "SCRIPT");
-            JXPanel _xpanel = new JXPanel();
+            JPanel _xpanel = new JPanel();
             _xpanel.setLayout(new JideBoxLayout(_xpanel));
             _xpanel.setBorder(_title);
             _xpanel.add(new RTextScrollPane(this._srcArea));
@@ -233,26 +246,27 @@ public class MainGUI extends JXFrame
         }
 
         this._ctxArea = new RSyntaxTextArea(50, 132);
-        this._ctxArea.setEditable(true);
         this._ctxArea.setFont(createEditFont());
+        this._ctxArea.setEditable(true);
         this._ctxArea.setAutoIndentEnabled(true);
         this._ctxArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON_WITH_COMMENTS);
         this._ctxArea.setText("{\n\n}");
         {
             Border _etch = BorderFactory.createEtchedBorder((EtchedBorder.LOWERED));
             TitledBorder _title = BorderFactory.createTitledBorder(_etch, "CONTEXT");
-            JXPanel _xpanel = new JXPanel();
+            JPanel _xpanel = new JPanel();
             _xpanel.setLayout(new JideBoxLayout(_xpanel));
             _xpanel.setBorder(_title);
-            _xpanel.add(new RTextScrollPane(this._ctxArea));
+            RTextScrollPane _rtsp = new RTextScrollPane(this._ctxArea);
+            _xpanel.add(_rtsp);
             this._ctxArea.setVisible(false);
-            _xpanel.addMouseListener(new MouseAdapter()
+            _rtsp.addMouseListener(new MouseAdapter()
             {
                 public void mouseReleased(final MouseEvent e)
                 {
                     if (SwingUtilities.isRightMouseButton(e))
                     {
-                        final JXPanel component = (JXPanel)e.getComponent();
+                        final RTextScrollPane component = (RTextScrollPane)e.getComponent();
                         final JPopupMenu menu = new JPopupMenu();
                         JMenuItem item = new JMenuItem(new AbstractAction("Show") {
                             @Override
@@ -279,22 +293,22 @@ public class MainGUI extends JXFrame
 
         Border _etch = BorderFactory.createEtchedBorder((EtchedBorder.LOWERED));
         TitledBorder _title = BorderFactory.createTitledBorder(_etch, "_ARGS");
-        _panel = new JXPanel();
+        _panel = new JPanel();
         _panel.setBorder(_title);
         _panel.setLayout(new JideBoxLayout(_panel, JideBoxLayout.Y_AXIS, 3));
         for(int _i=0; _i<16; _i++)
         {
-            JXPanel __panel = new JXPanel();
+            JPanel __panel = new JPanel();
             JButton _button;
-            JXTextField _text1;
-            JXTextField _text2;
+            JTextField _text1;
+            JTextField _text2;
 
-            __panel.add(_text2 = new JXTextField("arg label"));
+            __panel.add(_text2 = new JTextField("arg label"));
             _text2.setColumns(10);
             _text2.setText("_ARG"+(_i+1));
             _argLabel.add(_text2);
 
-            __panel.add(_text1 = new JXTextField("arg"));
+            __panel.add(_text1 = new JTextField("arg"));
             _text1.setColumns(60);
             _argList.add(_text1);
 
@@ -326,15 +340,19 @@ public class MainGUI extends JXFrame
     }
 
     private void logClear() {
-        this._textArea.setText("");
-        this._textArea.repaint();
+        SwingUtilities.invokeLater(()->{
+            this._textArea.setText("");
+            this._textArea.repaint();
+        });
     }
 
     public synchronized void logPrint(String message)
     {
-        this._textArea.append(message);
-        this._textArea.setCaretPosition(this._textArea.getDocument().getLength());
-        this._textArea.repaint();
+        SwingUtilities.invokeLater(()->{
+            this._textArea.append(message);
+            this._textArea.setCaretPosition(this._textArea.getDocument().getLength());
+            this._textArea.repaint();
+        });
     }
 
     @SneakyThrows
@@ -359,8 +377,54 @@ public class MainGUI extends JXFrame
         }
         else
         {
-            _INSTANCE._startdir=_INSTANCE._lastdir=_INSTANCE._baseDir=new File(".");
+            _INSTANCE._startdir=_INSTANCE._lastdir=_INSTANCE._baseDir=new File(OsUtil.getCurrentDirectory());
         }
+
+        Handler _h = new Handler() {
+            SimpleDateFormat _sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+            @Override
+            public void publish(LogRecord _record)
+            {
+                if(_record.getLevel() == Level.INFO)
+                {
+                    _INSTANCE.logPrint(_sdf.format(new Date(_record.getMillis()))+" "+Objects.toString(_record.getLevel().getName())+" "+_record.getMessage());
+                }
+                else
+                {
+                    String _thrown = null;
+                    if(_record.getThrown()!=null)
+                    {
+                        StringWriter _sw = new StringWriter();
+                        PrintWriter _pw = new PrintWriter(_sw);
+                        _record.getThrown().printStackTrace(_pw);
+                        _pw.flush();
+                        _thrown = _sw.getBuffer().toString();
+                    }
+                    _INSTANCE.logPrint(_sdf.format(new Date(_record.getMillis()))+" "+Objects.toString(_record.getLevel().getName())+" "
+                            +_record.getSourceClassName()
+                            +"@"
+                            +_record.getSourceMethodName()
+                            +" "
+                            +_record.getMessage()
+                            +(_thrown!=null ? "\n"+_thrown : "")
+                    );
+                }
+            }
+
+            @Override
+            public void flush() {
+
+            }
+
+            @Override
+            public void close() throws SecurityException {
+
+            }
+        };
+
+        Logger.getGlobal().addHandler(_h);
+        Logger.getAnonymousLogger().addHandler(_h);
+        Logger.getLogger("").addHandler(_h);
 
         _INSTANCE.init();
         _INSTANCE.pack();
@@ -382,7 +446,7 @@ public class MainGUI extends JXFrame
     @SneakyThrows
     static public synchronized Font createEditFont()
     {
-        return createEditFont(10f);
+        return createEditFont(12f);
     }
 
     static Font _regfont = null;
@@ -475,12 +539,12 @@ public class MainGUI extends JXFrame
                 _comp = this._textArea;
                 break;
             }
-            case 1:
+            case TAB_SCRIPT_INDEX:
             {
                 _comp = this._srcArea;
                 break;
             }
-            case 2:
+            case TAB_CONTEXT_INDEX:
             {
                 _comp = this._ctxArea;
                 break;
@@ -502,12 +566,12 @@ public class MainGUI extends JXFrame
                 _comp = this._textArea;
                 break;
             }
-            case 1:
+            case TAB_SCRIPT_INDEX:
             {
                 _comp = this._srcArea;
                 break;
             }
-            case 2:
+            case TAB_CONTEXT_INDEX:
             {
                 _comp = this._ctxArea;
                 break;
@@ -518,6 +582,32 @@ public class MainGUI extends JXFrame
 
         int _size = _comp.getFont().getSize();
         _comp.setFont(_comp.getFont().deriveFont((float)(_size-2f)));
+    }
+
+    public void handleDefaultFontSize() {
+        JComponent _comp = null;
+        switch(this._tabbedPane.getSelectedIndex())
+        {
+            case TAB_OUTPUT_INDEX:
+            {
+                _comp = this._textArea;
+                break;
+            }
+            case TAB_SCRIPT_INDEX:
+            {
+                _comp = this._srcArea;
+                break;
+            }
+            case TAB_CONTEXT_INDEX:
+            {
+                _comp = this._ctxArea;
+                break;
+            }
+            default:
+                return;
+        }
+
+        _comp.setFont(_comp.getFont().deriveFont(12f));
     }
 
     public void handleResetTab()
@@ -548,8 +638,8 @@ public class MainGUI extends JXFrame
             {
                 for(int _i=0; _i<this._argList.size(); _i++)
                 {
-                    JXTextField _fv = this._argList.get(_i);
-                    JXTextField _fk = this._argLabel.get(_i);
+                    JTextField _fv = this._argList.get(_i);
+                    JTextField _fk = this._argLabel.get(_i);
 
                     _fk.setText("_ARG"+(_i+1));
                     _fv.setText("");
@@ -778,28 +868,28 @@ public class MainGUI extends JXFrame
             {
                 case TAB_OUTPUT_INDEX:
                 {
-                    Files.write(this._textArea.getText(), _file, StandardCharsets.UTF_8);
+                    Files.writeString(_file.toPath(), this._textArea.getText(), StandardCharsets.UTF_8);
                     break;
                 }
                 case TAB_SCRIPT_INDEX:
                 {
-                    Files.write(this._srcArea.getText(), _file, StandardCharsets.UTF_8);
+                    Files.writeString(_file.toPath(), this._srcArea.getText(), StandardCharsets.UTF_8);
                     this._srcFile = _file;
                     this._tabbedPane.setTitleAt(TAB_SCRIPT_INDEX,"Script");
                     break;
                 }
                 case TAB_CANVAS_INDEX:
                 {
-                    String _ext = Files.getFileExtension(_file.getName());
+                    String _ext = FileUtils.extension(_file.getName());
                     ImageIO.write(this.iImage,_ext,_file);
                     this._tabbedPane.setTitleAt(TAB_CANVAS_INDEX,"Canvas");
                     break;
                 }
                 case TAB_CONTEXT_INDEX:
                 {
-                    Files.write(this._srcArea.getText(), _file, StandardCharsets.UTF_8);
+                    Files.writeString(_file.toPath(), this._ctxArea.getText(), StandardCharsets.UTF_8);
                     this._ctxFile = _file;
-                    this._tabbedPane.setTitleAt(2,"Context");
+                    this._tabbedPane.setTitleAt(TAB_CONTEXT_INDEX,"Context");
                     break;
                 }
                 case TAB_ARGUMENTS_INDEX:
@@ -807,8 +897,8 @@ public class MainGUI extends JXFrame
                     Map<String,Object> _list = new HashMap<>();
                     for(int _i=0; _i<this._argList.size(); _i++)
                     {
-                        JXTextField _fv = this._argList.get(_i);
-                        JXTextField _fk = this._argLabel.get(_i);
+                        JTextField _fv = this._argList.get(_i);
+                        JTextField _fk = this._argLabel.get(_i);
 
                         if(_fk.getText().trim().length()!=0)
                         {
@@ -826,7 +916,7 @@ public class MainGUI extends JXFrame
         }
     }
 
-    private void handleSelectFileDir(JXTextField _text, boolean _dirOnly)
+    private void handleSelectFileDir(JTextField _text, boolean _dirOnly)
     {
         JFileChooser _j = new JFileChooser();
         _j.setCurrentDirectory(this._lastdir);
@@ -850,7 +940,9 @@ public class MainGUI extends JXFrame
 
     private void handleExecute(boolean _compileOnly)
     {
-        this._tabbedPane.setSelectedIndex(0);
+        SwingUtilities.invokeLater(()->{
+            this._tabbedPane.setSelectedIndex(0);
+        });
 
         LuayContext _ctx = buildContaxt();
 
@@ -860,7 +952,7 @@ public class MainGUI extends JXFrame
         };
 
         List<String> _args = new Vector<>();
-        for(JXTextField _f : this._argList)
+        for(JTextField _f : this._argList)
         {
             if(_f.getText().trim().length()==0) break;
             _args.add(_f.getText().trim());
@@ -869,8 +961,8 @@ public class MainGUI extends JXFrame
 
         for(int _i=0; _i<this._argList.size(); _i++)
         {
-            JXTextField _fv = this._argList.get(_i);
-            JXTextField _fk = this._argLabel.get(_i);
+            JTextField _fv = this._argList.get(_i);
+            JTextField _fk = this._argLabel.get(_i);
 
             if(_fk.getText().trim().length()!=0 && _fv.getText().trim().length()!=0)
             {
@@ -944,7 +1036,11 @@ public class MainGUI extends JXFrame
                 })
                 .baseLibraries()
                 .noDefaultSearchPaths(true)
-                .searchPath(this._baseDir.getAbsolutePath() + "/lua")
+                .searchPath(this._baseDir.getAbsolutePath() + "/luay")
+                .searchPath(OsUtil.getUserConfigDirectory("luay"))
+                .searchPath(OsUtil.getUserDataDirectory("luay"))
+                .searchPath(OsUtil.getUnixyUserDataDirectory("luay"))
+                .searchPath(OsUtil.getSystemDataDirectory("luay"))
                 .build();
     }
 

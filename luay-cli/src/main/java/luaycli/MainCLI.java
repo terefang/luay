@@ -1,16 +1,18 @@
 package luaycli;
 
 import lombok.extern.slf4j.Slf4j;
+import luay.lib.LuayLibraryFactory;
+import luay.lib.LuaySimpleLibraryFactory;
 import luay.main.LuayBuilder;
 import luay.main.LuayContext;
 import luay.main.LuayHelper;
 import luay.vm.LuaError;
 import luay.vm.LuaList;
-import luay.ldata.LdataParser;
+import com.github.terefang.jmelange.data.ldata.LdataParser;
 import picocli.CommandLine;
 
 import java.io.File;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class MainCLI {
@@ -28,6 +30,20 @@ public class MainCLI {
         {
             System.out.println("Command: luay-cli Version: "+ Version._VERSION+" Build: "+Version._BUILD);
         }
+        else if ("-list-path".equalsIgnoreCase(args[0])
+                || "--list-path".equalsIgnoreCase(args[0])) {
+            for (String _path : buildSearchpath())
+            {
+                System.out.println(_path);
+            }
+        }
+        else if ("-list-modules".equalsIgnoreCase(args[0])
+                || "--list-modules".equalsIgnoreCase(args[0])) {
+            for (String _path : buildModlist())
+            {
+                System.out.println(_path);
+            }
+        }
         else
         {
             pMain.opts = new CliOptions();
@@ -36,6 +52,50 @@ public class MainCLI {
             pMain.runCli();
         }
         System.exit(0);
+    }
+
+    static List<String> buildModlist()
+    {
+        List<String> _ret = new Vector<>();
+        {
+            ServiceLoader<LuayLibraryFactory> _ldr = ServiceLoader.load(LuayLibraryFactory.class);
+            Iterator<LuayLibraryFactory> _it = _ldr.iterator();
+            while (_it.hasNext()) {
+                LuayLibraryFactory _lf = _it.next();
+                _ret.add(_lf.getName());
+            }
+        }
+        {
+            ServiceLoader<LuaySimpleLibraryFactory> _ldr = ServiceLoader.load(LuaySimpleLibraryFactory.class);
+            Iterator<LuaySimpleLibraryFactory> _it = _ldr.iterator();
+            while (_it.hasNext()) {
+                LuaySimpleLibraryFactory _lf = _it.next();
+                _ret.add(_lf.getName());
+            }
+        }
+        return _ret;
+    }
+
+    static List<String> buildSearchpath()
+    {
+        List<String> _ret = new Vector<>();
+        for(String _Env : new String[] { "LUAY_MODULES", "LUAY_LIB", "LUAY_PATH", "LUAY_HOME" })
+        {
+            if(System.getenv(_Env)!=null)
+            {
+                for(String _part : System.getenv(_Env).split(":"))
+                {
+                    _ret.add(_part);
+                }
+            }
+        }
+
+        _ret.add(OsUtil.getUserConfigDirectory("luay"));
+        _ret.add(OsUtil.getUserDataDirectory("luay"));
+        _ret.add(OsUtil.getUnixyUserDataDirectory("luay"));
+        _ret.add(OsUtil.getSystemDataDirectory("luay"));
+
+        return _ret;
     }
 
     LuayContext buildContaxt()
@@ -47,35 +107,10 @@ public class MainCLI {
             this.opts.includePaths.forEach((_f)->{_b.searchPath(_f.getAbsolutePath());});
         }
 
-        for(String _Env : new String[] { "LUAY_MODULES", "LUAY_LIB", "LUAY_PATH", "LUAY_HOME" })
+        for(String _part : buildSearchpath())
         {
-            if(System.getenv(_Env)!=null)
-            {
-                for(String _part : System.getenv(_Env).split(":"))
-                {
-                    _b.searchPath(_part);
-                }
-            }
+            _b.searchPath(_part);
         }
-
-        _b.searchPath(new File(OsUtil.getJarDirectory(),"lib/luay").getAbsolutePath());
-        //_b.searchPath(new File(OsUtil.getCurrentDirectory(),"lib/luay").getAbsolutePath());
-
-        _b.searchPath(new File(new File(OsUtil.getJarDirectory()).getParentFile(),"share/luay").getAbsolutePath());
-        //_b.searchPath(new File(new File(OsUtil.getCurrentDirectory()).getParentFile(),"share/luay").getAbsolutePath());
-
-        _b.searchPath(new File(new File(OsUtil.getJarDirectory()).getParentFile(),"lib/luay").getAbsolutePath());
-        //_b.searchPath(new File(new File(OsUtil.getCurrentDirectory()).getParentFile(),"lib/luay").getAbsolutePath());
-
-        _b.searchPath(OsUtil.getUserDataDirectory("luay"));
-        _b.searchPath(OsUtil.getUserConfigDirectory("luay"));
-
-        _b.searchPath(OsUtil.getUnixyUserDataDirectory("luay"));
-
-        _b.searchPath(OsUtil.getUserDataDirectory());
-
-        _b.searchPath(OsUtil.getSystemDataDirectory("luay"));
-
         return _b.build();
     }
 

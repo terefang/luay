@@ -1,8 +1,12 @@
 package luay.lib;
 
 import luay.vm.*;
+import luay.vm.lib.java.JavaList;
+import luay.vm.lib.java.JavaMap;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Vector;
 
 public class LuayStringifierFunction extends LuaFunction {
@@ -35,9 +39,19 @@ public class LuayStringifierFunction extends LuaFunction {
 
     public static LuaValue _stringify(List<String> _known, LuaValue _that, boolean _indicators)
     {
+        if(_that instanceof JavaList)
+        {
+            return _stringify_table(_known,(JavaList)_that, _indicators, false);
+        }
+        else
         if(_that instanceof LuaList)
         {
             return _stringify_table(_known, (LuaList)_that, _indicators, true);
+        }
+        else
+        if(_that instanceof JavaMap)
+        {
+            return _stringify_table(_known,(JavaMap)_that, _indicators, false);
         }
         else
         if(_that.istable())
@@ -72,6 +86,10 @@ public class LuayStringifierFunction extends LuaFunction {
         return LuaString.valueOf(_that.tojstring());
     }
 
+    public static Varargs _stringify_vararg(Varargs _that, boolean _indicators)
+    {
+        return _stringify_vararg(new Vector<>(),_that.arg1(), _indicators);
+    }
     public static Varargs _stringify_vararg(List<String> _known, Varargs _that, boolean _indicators)
     {
         // stringify was called with arguments
@@ -127,6 +145,44 @@ public class LuayStringifierFunction extends LuaFunction {
                 _first=false;
             }
             _sb.append(" }");
+            return LuaString.valueOf(_sb.toString());
+        }
+    }
+
+    public static LuaValue _stringify_table(List<String> _known, JavaMap _that, boolean _indicators, boolean _forcelist)
+    {
+        Map _jmap = (Map)_that.userdata();
+        {
+            StringBuilder _sb = new StringBuilder();
+            boolean _first = true;
+            _sb.append("map:{ ");
+            for(Object _k : _jmap.keySet())
+            {
+                if(!_first) _sb.append(", ");
+                _sb.append(Objects.toString(_k));
+                _sb.append(" -> ");
+                _sb.append(Objects.toString(_jmap.get(_k)));
+                _first=false;
+            }
+            _sb.append(" }");
+            return LuaString.valueOf(_sb.toString());
+        }
+    }
+
+    public static LuaValue _stringify_table(List<String> _known, JavaList _that, boolean _indicators, boolean _forcelist)
+    {
+        List _jmap = (List)_that.userdata();
+        {
+            StringBuilder _sb = new StringBuilder();
+            boolean _first = true;
+            _sb.append("list:[ ");
+            for(Object _k : _jmap)
+            {
+                if(!_first) _sb.append(", ");
+                _sb.append(Objects.toString(_k));
+                _first=false;
+            }
+            _sb.append(" ]");
             return LuaString.valueOf(_sb.toString());
         }
     }

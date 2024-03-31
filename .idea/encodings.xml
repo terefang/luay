@@ -1,8 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/luay-cli/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-cli/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/luay-core/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/luay-core/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-docs/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-docs/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-ext-dao/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-ext-dao/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-ext-exec/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-ext-exec/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-ext-okhttp/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-ext-okhttp/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-ext-slf4j/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-ext-slf4j/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-ext-snmp/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-ext-snmp/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-ext/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-ext/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-gui/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/luay-gui/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>

@@ -26,6 +26,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import luay.vm.lib.MathLib;
 
@@ -269,6 +271,13 @@ public class LuaString extends LuaValue {
 		return m_string;
 	}
 
+	@Override
+	public byte[] tojbytes() {
+		if(m_string==null)
+			return Arrays.copyOfRange(m_bytes, m_offset, m_offset+m_length);
+		return m_string.getBytes(StandardCharsets.UTF_8);
+	}
+
 	public int lengthAsUtf8(){
 		int i,j,n,b;
 		for ( i=m_offset,j=m_offset+m_length,n=0; i<j; ++n ) {
@@ -287,51 +296,91 @@ public class LuaString extends LuaValue {
 
 	// basic binary arithmetic
 	public LuaValue   add( LuaValue rhs )      { double d = scannumber(); return Double.isNaN(d)? arithmt(ADD,rhs): rhs.add(d); }
+
 	public LuaValue   add( double rhs )        { return valueOf( checkarith() + rhs ); }
+
 	public LuaValue   add( int rhs )           { return valueOf( checkarith() + rhs ); }
+
 	public LuaValue   sub( LuaValue rhs )      { double d = scannumber(); return Double.isNaN(d)? arithmt(SUB,rhs): rhs.subFrom(d); }
+
 	public LuaValue   sub( double rhs )        { return valueOf( checkarith() - rhs ); }
+
 	public LuaValue   sub( int rhs )           { return valueOf( checkarith() - rhs ); }
+
 	public LuaValue   subFrom( double lhs )    { return valueOf( lhs - checkarith() ); }
+
 	public LuaValue   mul( LuaValue rhs )      { double d = scannumber(); return Double.isNaN(d)? arithmt(MUL,rhs): rhs.mul(d); }
+
 	public LuaValue   mul( double rhs )        { return valueOf( checkarith() * rhs ); }
+
 	public LuaValue   mul( int rhs )           { return valueOf( checkarith() * rhs ); }
+
 	public LuaValue   pow( LuaValue rhs )      { double d = scannumber(); return Double.isNaN(d)? arithmt(POW,rhs): rhs.powWith(d); }
+
 	public LuaValue   pow( double rhs )        { return MathLib.dpow(checkarith(),rhs); }
+
 	public LuaValue   pow( int rhs )           { return MathLib.dpow(checkarith(),rhs); }
+
 	public LuaValue   powWith( double lhs )    { return MathLib.dpow(lhs, checkarith()); }
+
 	public LuaValue   powWith( int lhs )       { return MathLib.dpow(lhs, checkarith()); }
+
 	public LuaValue   div( LuaValue rhs )      { double d = scannumber(); return Double.isNaN(d)? arithmt(DIV,rhs): rhs.divInto(d); }
+
 	public LuaValue   div( double rhs )        { return LuaDouble.ddiv(checkarith(),rhs); }
+
 	public LuaValue   div( int rhs )           { return LuaDouble.ddiv(checkarith(),rhs); }
+
 	public LuaValue   divInto( double lhs )    { return LuaDouble.ddiv(lhs, checkarith()); }
+
 	public LuaValue   mod( LuaValue rhs )      { double d = scannumber(); return Double.isNaN(d)? arithmt(MOD,rhs): rhs.modFrom(d); }
+
 	public LuaValue   mod( double rhs )        { return LuaDouble.dmod(checkarith(), rhs); }
+
 	public LuaValue   mod( int rhs )           { return LuaDouble.dmod(checkarith(), rhs); }
+
 	public LuaValue   modFrom( double lhs )    { return LuaDouble.dmod(lhs, checkarith()); }
 
 	// relational operators, these only work with other strings
 	public LuaValue   lt( LuaValue rhs )         { return rhs.isstring() ? (rhs.strcmp(this)>0? LuaValue.TRUE: FALSE) : super.lt(rhs); }
+
 	public boolean lt_b( LuaValue rhs )       { return rhs.isstring() ? rhs.strcmp(this)>0 : super.lt_b(rhs); }
+
 	public boolean lt_b( int rhs )         { typerror("attempt to compare string with number"); return false; }
+
 	public boolean lt_b( double rhs )      { typerror("attempt to compare string with number"); return false; }
+
 	public LuaValue   lteq( LuaValue rhs )       { return rhs.isstring() ? (rhs.strcmp(this)>=0? LuaValue.TRUE: FALSE) : super.lteq(rhs); }
+
 	public boolean lteq_b( LuaValue rhs )     { return rhs.isstring() ? rhs.strcmp(this)>=0 : super.lteq_b(rhs); }
+
 	public boolean lteq_b( int rhs )       { typerror("attempt to compare string with number"); return false; }
+
 	public boolean lteq_b( double rhs )    { typerror("attempt to compare string with number"); return false; }
+
 	public LuaValue   gt( LuaValue rhs )         { return rhs.isstring() ? (rhs.strcmp(this)<0? LuaValue.TRUE: FALSE) : super.gt(rhs); }
+
 	public boolean gt_b( LuaValue rhs )       { return rhs.isstring() ? rhs.strcmp(this)<0 : super.gt_b(rhs); }
+
 	public boolean gt_b( int rhs )         { typerror("attempt to compare string with number"); return false; }
+
 	public boolean gt_b( double rhs )      { typerror("attempt to compare string with number"); return false; }
+
 	public LuaValue   gteq( LuaValue rhs )       { return rhs.isstring() ? (rhs.strcmp(this)<=0? LuaValue.TRUE: FALSE) : super.gteq(rhs); }
+
 	public boolean gteq_b( LuaValue rhs )     { return rhs.isstring() ? rhs.strcmp(this)<=0 : super.gteq_b(rhs); }
+
 	public boolean gteq_b( int rhs )       { typerror("attempt to compare string with number"); return false; }
+
 	public boolean gteq_b( double rhs )    { typerror("attempt to compare string with number"); return false; }
 
 	// concatenation
 	public LuaValue concat(LuaValue rhs)      { return rhs.concatTo(this); }
+
 	public Buffer   concat(Buffer rhs)        { return rhs.concatTo(this); }
+
 	public LuaValue concatTo(LuaNumber lhs)   { return concatTo(lhs.strvalue()); }
+
 	public LuaValue concatTo(LuaString lhs)   {
 		byte[] b = new byte[lhs.m_length+this.m_length];
 		System.arraycopy(lhs.m_bytes, lhs.m_offset, b, 0, lhs.m_length);
@@ -341,6 +390,7 @@ public class LuaString extends LuaValue {
 
 	// string comparison
 	public int strcmp(LuaValue lhs)           { return -lhs.strcmp(this); }
+
 	public int strcmp(LuaString rhs) {
 		for ( int i=0, j=0; i<m_length && j<rhs.m_length; ++i, ++j ) {
 			if ( m_bytes[m_offset+i] != rhs.m_bytes[rhs.m_offset+j] ) {
@@ -361,21 +411,26 @@ public class LuaString extends LuaValue {
 	public int checkint() {
 		return (int) (long) checkdouble();
 	}
+
 	public LuaInteger checkinteger() {
 		return valueOf(checkint());
 	}
+
 	public long checklong() {
 		return (long) checkdouble();
 	}
+
 	public double checkdouble() {
 		double d = scannumber();
 		if ( Double.isNaN(d) )
 			argerror("number");
 		return d;
 	}
+
 	public LuaNumber checknumber() {
 		return valueOf(checkdouble());
 	}
+
 	public LuaNumber checknumber(String msg) {
 		double d = scannumber();
 		if ( Double.isNaN(d) )
@@ -405,11 +460,17 @@ public class LuaString extends LuaValue {
 	}
 
 	public byte    tobyte()        { return (byte) toint(); }
+
 	public char    tochar()        { return (char) toint(); }
+
 	public double  todouble()      { double d=scannumber(); return Double.isNaN(d)? 0: d; }
+
 	public float   tofloat()       { return (float) todouble(); }
+
 	public int     toint()         { return (int) tolong(); }
+
 	public long    tolong()        { return (long) todouble(); }
+
 	public short   toshort()       { return (short) toint(); }
 
 	public double optdouble(double defval) {
@@ -491,6 +552,7 @@ public class LuaString extends LuaValue {
 
 	// equality w/ metatable processing
 	public LuaValue eq( LuaValue val )    { return val.raweq(this)? TRUE: FALSE; }
+
 	public boolean eq_b( LuaValue val )   { return val.raweq(this); }
 
 	// equality w/o metatable processing
@@ -559,6 +621,11 @@ public class LuaString extends LuaValue {
 
 	public String checkjstring() {
 		return tojstring();
+	}
+
+	@Override
+	public byte[] checkjbytes() {
+		return tojbytes();
 	}
 
 	public LuaString checkstring() {
@@ -675,6 +742,7 @@ public class LuaString extends LuaValue {
 		}
 		return new String(chars);
 	}
+
 	public static char[] toCharAsUtf8(byte[] bytes, int offset, int length) {
 		int i,j,n,b;
 		for ( i=offset,j=offset+length,n=0; i<j; ++n ) {
@@ -692,6 +760,7 @@ public class LuaString extends LuaValue {
 		}
 		return chars;
 	}
+
 	/**
 	 * Count the number of bytes required to encode the string as UTF-8.
 	 * @param chars Array of unicode characters to be encoded as UTF-8

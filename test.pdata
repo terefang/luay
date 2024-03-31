@@ -1,0 +1,7 @@
+{
+    _SNMP = {
+        address = "1234"
+        port = 126
+        secret = "1234"
+    }
+}

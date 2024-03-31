@@ -3,6 +3,8 @@ package luay.vm;
 import luay.vm.lib.MathLib;
 
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class LuaUtf8String extends LuaValue {
 
@@ -153,6 +155,13 @@ public class LuaUtf8String extends LuaValue {
 		if(m_string==null)
 			m_string = decodeAsUtf8(m_bytes, m_offset, m_length);
 		return m_string;
+	}
+
+	@Override
+	public byte[] tojbytes() {
+		if(m_string==null)
+			return new String(m_bytes, m_offset, m_length).getBytes(StandardCharsets.UTF_8);
+		return m_string.getBytes(StandardCharsets.UTF_8);
 	}
 
 	// unary operators
@@ -441,6 +450,10 @@ public class LuaUtf8String extends LuaValue {
 
 	public String checkjstring() {
 		return tojstring();
+	}
+
+	public byte[] checkjbytes() {
+		return tojbytes();
 	}
 
 	public LuaString checkstring() {

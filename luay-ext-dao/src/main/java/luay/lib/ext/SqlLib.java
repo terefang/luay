@@ -8,8 +8,11 @@ import luay.main.LuayHelper;
 import luay.vm.*;
 import luay.vm.lib.ThreeArgFunction;
 import luay.vm.lib.VarArgFunction;
+import luay.vm.lib.ZeroArgFunction;
 import luay.vm.lib.java.CoerceJavaToLua;
 
+import java.sql.Driver;
+import java.sql.DriverManager;
 import java.util.*;
 
 public class SqlLib extends AbstractLibrary implements LuayLibraryFactory
@@ -26,7 +29,8 @@ public class SqlLib extends AbstractLibrary implements LuayLibraryFactory
 				_jtds.class,
                 _xlsql.class,
                 _pgsql.class,
-				_jdbc.class
+				_jdbc.class,
+				_drivers.class
                 );
     }
 
@@ -36,6 +40,24 @@ public class SqlLib extends AbstractLibrary implements LuayLibraryFactory
     }
 
 	public SqlLib() { }
+
+
+	public static class _drivers extends ZeroArgFunction
+	{
+
+		@Override
+		public LuaValue call()
+		{
+			LuaList _t = new LuaList();
+			Enumeration<Driver> _dr = DriverManager.getDrivers();
+			while(_dr.hasMoreElements())
+			{
+				Driver _d = _dr.nextElement();
+				_t.insert(LuaValue.valueOf(_d.getClass().getName()));
+			}
+			return _t;
+		}
+	}
 
 	public static abstract class _driver extends VarArgFunction
 	{
@@ -255,7 +277,7 @@ public class SqlLib extends AbstractLibrary implements LuayLibraryFactory
 			}
 			catch (Exception _xe)
 			{
-				return varargsOf(LuaValue.NIL, valueOf(_xe.getMessage()));
+				throw new LuaError(_xe);
 			}
 			return LuaValue.NIL;
 		}
@@ -300,7 +322,7 @@ public class SqlLib extends AbstractLibrary implements LuayLibraryFactory
 			}
 			catch (Exception _xe)
 			{
-				return varargsOf(LuaValue.NIL, valueOf(_xe.getMessage()));
+				throw new LuaError(_xe);
 			}
 			return LuaValue.NIL;
 		}

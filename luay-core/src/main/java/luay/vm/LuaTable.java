@@ -928,7 +928,7 @@ public class LuaTable extends LuaValue implements Metatable {
 		if (key.isinttype()) {
 			return new IntKeyEntry(key.toint(), value);
 		} else if (value.type() == TNUMBER) {
-			return new NumberValueEntry(key, value.todouble());
+			return new NumberValueEntry(key, (LuaNumber) value);
 		} else {
 			return new NormalEntry(key, value);
 		}
@@ -1431,10 +1431,10 @@ public class LuaTable extends LuaValue implements Metatable {
 	 * Entry class used with numeric values, but only when the key is not an integer.
 	 */
 	private static class NumberValueEntry extends Entry {
-		private double value;
+		private LuaNumber value;
 		private final LuaValue key;
 
-		NumberValueEntry(LuaValue key, double value) {
+		NumberValueEntry(LuaValue key, LuaNumber value) {
 			this.key = key;
 			this.value = value;
 		}
@@ -1444,18 +1444,18 @@ public class LuaTable extends LuaValue implements Metatable {
 		}
 
 		public LuaValue value() {
-			return valueOf(value);
+			return value;
 		}
 
-		public Entry set(LuaValue value) {
-			if (value.type() == TNUMBER) {
-				LuaValue n = value.tonumber();
+		public Entry set(LuaValue _value) {
+			if (_value.type() == TNUMBER) {
+				LuaValue n = _value.tonumber();
 				if (!n.isnil()) {
-					this.value = n.todouble();
+					this.value = (LuaNumber) _value;
 					return this;
 				}
 			}
-			return new NormalEntry(this.key, value);
+			return new NormalEntry(this.key, _value);
 		}
 
 		public int keyindex(int mask) {

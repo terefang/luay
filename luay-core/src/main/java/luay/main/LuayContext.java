@@ -1,6 +1,7 @@
 package luay.main;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import luay.vm.*;
 import luay.vm.lib.PackageLib;
 import luay.vm.lib.java.CoerceJavaToLua;
@@ -12,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class LuayContext {
     private final LuayGlobal globals;
 
@@ -203,9 +205,14 @@ public class LuayContext {
 
             return CoerceLuaToJava.coerce(_ret, Object.class);
         }
+        catch(LuaError _le)
+        {
+            log.error(_le.getMessage(),_le);
+            return _le;
+        }
         catch(Throwable _th)
         {
-            _th.getMessage();
+            log.error(_th.getMessage());
             return _th;
         }
         finally

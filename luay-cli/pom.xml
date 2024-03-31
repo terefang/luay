@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.github.terefang.luay</groupId>
         <artifactId>luay</artifactId>
-        <version>2023.10.231</version>
+        <version>2023.12.240</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -164,49 +164,33 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>eu.somatik.serviceloader-maven-plugin</groupId>
-                <artifactId>serviceloader-maven-plugin</artifactId>
-                <version>1.3.1</version>
-                <configuration>
-                    <services>
-                        <param>luay.lib.LuayLibraryFactory</param>
-                        <param>luay.lib.LuaySimpleLibraryFactory</param>
-                    </services>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <configuration>
-                    <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
-                            <resource>.SF</resource>
-                        </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
-                            <resource>.DSA</resource>
-                        </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                            <resource>META-INF/services/*</resource>
-                        </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                            <resource>META-INF/LICENSE</resource>
-                        </transformer>
-                    </transformers>
-                    <finalName>${artifactId}-${version}-shaded-full</finalName>
-                </configuration>
+                <version>3.5.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                                    <resource>.SF</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                                    <resource>.DSA</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <!--transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/services/com.github.terefang.jmelange.script.ITemplateContextFactory</resource>
+                                </transformer-->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/LICENSE</resource>
+                                </transformer>
+                            </transformers>
+                            <finalName>${artifactId}-${version}-shaded-full</finalName>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -215,6 +199,14 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
                 <inherited>false</inherited>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.redline-rpm</groupId>
+                        <artifactId>redline</artifactId>
+                        <version>1.2.9</version>
+                        <classifier>jar-with-dependencies</classifier>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
                         <id>ant</id>
@@ -224,11 +216,42 @@
                         </goals>
                         <configuration>
                             <target>
+                                <taskdef classname="org.redline_rpm.ant.RedlineTask" name="xrpm" />
 
                                 <concat destfile="${project.build.directory}/${project.artifactId}.sh.bin" binary="true">
                                     <fileset file="${project.basedir}/src/main/dist/stub.sh"/>
                                     <fileset file="${project.build.directory}/${project.artifactId}-${project.version}-shaded-full.jar"/>
                                 </concat>
+
+                                <copy tofile="${project.build.directory}/stub.sh" file="${project.basedir}/src/main/dist/stub.sh" />
+
+                                <replace file="${project.build.directory}/stub.sh"
+                                         token="#export JAVA_HOME"
+                                         value="export JAVA_HOME=/usr/libexec/toolbox/java21"/>
+
+                                <concat destfile="${project.build.directory}/luay" binary="true">
+                                    <fileset file="${project.build.directory}/stub.sh"/>
+                                    <fileset file="${project.build.directory}/${project.artifactId}-${project.version}-shaded-full.jar"/>
+                                </concat>
+
+                                <xrpm
+                                        architecture="X86_64"
+                                        destination="${project.build.directory}"
+                                        license="ASL"
+                                        group="${project.artifactId}"
+                                        name="toolbox-${project.artifactId}"
+                                        summary="${project.artifactId}"
+                                        distribution="${project.artifactId}"
+                                        packager="${project.artifactId}"
+                                        url=""
+                                        vendor="${project.artifactId}"
+                                        epoch="${buildNumber}"
+                                        release="${buildNumber}.${timestamp}"
+                                        version="${project.version}">
+
+                                    <rpmfileset prefix="/usr/libexec/toolbox/xbin" filemode='555' file="${project.build.directory}/luay" username="root" group="root" addParents="false" />
+
+                                </xrpm>
                             </target>
                         </configuration>
                     </execution>

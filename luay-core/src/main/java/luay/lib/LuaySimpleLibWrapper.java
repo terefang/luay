@@ -23,6 +23,11 @@ public class LuaySimpleLibWrapper extends LuaFunction
     {
         LuaValue _llib = CoerceJavaToLua.coerce(this._lib);
 
+        if(this._lib instanceof LuayGlobalsAwareLibrary)
+        {
+            ((LuayGlobalsAwareLibrary)this._lib).setGlobals(env);
+        }
+
         env.set(this._name, _llib);
 
         if (!env.get("package").isnil()) env.get("package").get("loaded").set(this._name, _llib);

@@ -6,22 +6,27 @@
 
     <groupId>com.github.terefang.luay</groupId>
     <artifactId>luay</artifactId>
-    <version>2023.10.231</version>
+    <version>2023.12.240</version>
     <packaging>pom</packaging>
     <modules>
         <module>luay-core</module>
+        <module>luay-ext-slf4j</module>
         <module>luay-ext-dao</module>
         <module>luay-ext-okhttp</module>
         <module>luay-ext-snmp</module>
+        <module>luay-ext-exec</module>
         <module>luay-gui</module>
         <module>luay-cli</module>
+        <module>luay-docs</module>
     </modules>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.jmelange>2023.4.237</version.jmelange>
+        <version.jmelange>2023.10.240</version.jmelange>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyyMMdd'+'HHmm</maven.build.timestamp.format>
     </properties>
     <dependencies>
         <dependency>
@@ -41,25 +46,35 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <inherited>false</inherited>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.4</version>
                 <executions>
                     <execution>
-                        <id>ant</id>
-                        <phase>package</phase>
+                        <id>buildnumber</id>
+                        <phase>validate</phase>
                         <goals>
-                            <goal>run</goal>
+                            <goal>create</goal>
                         </goals>
-                        <configuration>
-                            <target>
-                               <exec executable="xbin/build-docs.sh" resolveexecutable="true" />
-                            </target>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <format>{0,number}</format>
+                    <items>
+                        <item>buildNumber</item>
+                    </items>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                    <revisionOnScmFailure>unknownbuild</revisionOnScmFailure>
+                </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <scm>
+        <connection>scm:svn:http://127.0.0.1/dummy</connection>
+        <developerConnection>scm:svn:https://127.0.0.1/dummy</developerConnection>
+        <tag>HEAD</tag>
+        <url>http://127.0.0.1/dummy</url>
+    </scm>
 </project>

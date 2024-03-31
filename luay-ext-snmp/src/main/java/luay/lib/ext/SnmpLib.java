@@ -11,7 +11,32 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+/*
+%!begin MARKDOWN
 
+## snmp
+
+SNMP.
+
+### Functions
+*   `snmp.oid( i1 [, ..., iN]) -> oidstring`
+*   `snmp.snmpv2( address [, port [, community]]) -> session`
+*   `snmp.close(session)`
+*   `snmp.closeall()`
+*   `snmp.getall(session, timeout, oid [, ..., oid]) -> list<table>`
+*   `snmp.get(session, oid [, timeout]) -> table`
+*   `snmp.next(session, oid [, timeout]) -> table`
+*   `snmp.walk(session, oid [, timeout [, quiteness]]) -> list<table>`
+
+### return table
+
+* /1/ – oid
+* /2/ – type-id
+* /3/ – value.toString
+* /4/ – snmpToLuaValue
+
+%!end MARKDOWN
+ */
 public class SnmpLib extends AbstractLibrary implements LuayLibraryFactory
 {
     @Override
@@ -36,6 +61,128 @@ public class SnmpLib extends AbstractLibrary implements LuayLibraryFactory
                 _varArgFunctionWrapper.from("walk",SnmpLib::_walk),
                 _varArgFunctionWrapper.from("next",SnmpLib::_next)
         );
+    }
+
+    @Override
+    public void customizeLibraryPackage(String _pname, LuaTable _package)
+    {
+        // SMI Type Id Enumerations
+/*
+%!begin MARKDOWN
+
+### SMI Type Ids
+
+*   `snmp.SMI_INTEGER`
+*   `snmp.SMI_STRING`
+*   `snmp.SMI_OBJECTID`
+*   `snmp.SMI_NULL`
+*   `snmp.SMI_APPSTRING`
+*   `snmp.SMI_IPADDRESS`
+*   `snmp.SMI_COUNTER32`
+*   `snmp.SMI_GAUGE32`
+*   `snmp.SMI_UNSIGNED32`
+*   `snmp.SMI_TIMETICKS`
+*   `snmp.SMI_OPAQUE`
+*   `snmp.SMI_COUNTER64`
+*   `snmp.SMI_NOSUCHOBJECT`
+*   `snmp.SMI_NOSUCHINSTANCE`
+*   `snmp.SMI_ENDOFMIBVIEW`
+
+%!end MARKDOWN
+ */
+        _package.set("SMI_INTEGER",        LuaValue.valueOf((int)SnmpSMI.SMI_INTEGER));
+        _package.set("SMI_STRING",         LuaValue.valueOf((int)SnmpSMI.SMI_STRING));
+        _package.set("SMI_OBJECTID",       LuaValue.valueOf((int)SnmpSMI.SMI_OBJECTID));
+        _package.set("SMI_NULL",           LuaValue.valueOf((int)SnmpSMI.SMI_NULL));
+        _package.set("SMI_APPSTRING",      LuaValue.valueOf((int)SnmpSMI.SMI_APPSTRING));
+        _package.set("SMI_IPADDRESS",      LuaValue.valueOf((int)SnmpSMI.SMI_IPADDRESS));
+        _package.set("SMI_COUNTER32",      LuaValue.valueOf((int)SnmpSMI.SMI_COUNTER32));
+        _package.set("SMI_GAUGE32",        LuaValue.valueOf((int)SnmpSMI.SMI_GAUGE32));
+        _package.set("SMI_UNSIGNED32",     LuaValue.valueOf((int)SnmpSMI.SMI_UNSIGNED32));
+        _package.set("SMI_TIMETICKS",      LuaValue.valueOf((int)SnmpSMI.SMI_TIMETICKS));
+        _package.set("SMI_OPAQUE",         LuaValue.valueOf((int)SnmpSMI.SMI_OPAQUE));
+        _package.set("SMI_COUNTER64",      LuaValue.valueOf((int)SnmpSMI.SMI_COUNTER64));
+        _package.set("SMI_NOSUCHOBJECT",   LuaValue.valueOf((int)SnmpSMI.SMI_NOSUCHOBJECT));
+        _package.set("SMI_NOSUCHINSTANCE", LuaValue.valueOf((int)SnmpSMI.SMI_NOSUCHINSTANCE));
+        _package.set("SMI_ENDOFMIBVIEW",   LuaValue.valueOf((int)SnmpSMI.SMI_ENDOFMIBVIEW));
+
+        // Basic Sys Oids
+/*
+%!begin MARKDOWN
+
+### basic sys oids
+
+*   `snmp.OID_sysDescr`
+*   `snmp.OID_sysOid`
+*   `snmp.OID_sysUptime`
+*   `snmp.OID_sysContact`
+*   `snmp.OID_sysName`
+*   `snmp.OID_sysLocation`
+
+%!end MARKDOWN
+ */
+        _package.set("OID_sysDescr",       LuaValue.valueOf(".1.3.6.1.2.1.1.1.0"));
+        _package.set("OID_sysOid",         LuaValue.valueOf(".1.3.6.1.2.1.1.2.0"));
+        _package.set("OID_sysUptime",      LuaValue.valueOf(".1.3.6.1.2.1.1.3.0"));
+        _package.set("OID_sysContact",     LuaValue.valueOf(".1.3.6.1.2.1.1.4.0"));
+        _package.set("OID_sysName",        LuaValue.valueOf(".1.3.6.1.2.1.1.5.0"));
+        _package.set("OID_sysLocation",    LuaValue.valueOf(".1.3.6.1.2.1.1.6.0"));
+
+        // ifTable
+/*
+%!begin MARKDOWN
+
+### iftable oids
+
+*   `snmp.OID_ifNumber`
+*   `snmp.OID_ifIndex`
+*   `snmp.OID_ifDescr`
+*   `snmp.OID_ifType`
+*   `snmp.OID_ifMtu`
+*   `snmp.OID_ifSpeed`
+*   `snmp.OID_ifPhysAddress`
+*   `snmp.OID_ifAdminStatus`
+*   `snmp.OID_ifOperStatus`
+*   `snmp.OID_ifLastChange`
+*   `snmp.OID_ifInOctets`
+*   `snmp.OID_ifInUcastPkts`
+*   `snmp.OID_ifInNUcastPkts`
+*   `snmp.OID_ifInDiscards`
+*   `snmp.OID_ifInErrors`
+*   `snmp.OID_ifInUnknownProtos`
+*   `snmp.OID_ifOutOctets`
+*   `snmp.OID_ifOutUcastPkts`
+*   `snmp.OID_ifOutNUcastPkts`
+*   `snmp.OID_ifOutDiscards`
+*   `snmp.OID_ifOutErrors`
+*   `snmp.OID_ifOutQLen`
+*   `snmp.OID_ifSpecific`
+
+%!end MARKDOWN
+ */
+        _package.set("OID_ifNumber",           LuaValue.valueOf(".1.3.6.1.2.1.2.1.0"));
+        _package.set("OID_ifIndex",            LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.1"));
+        _package.set("OID_ifDescr",            LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.2"));
+        _package.set("OID_ifType",             LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.3"));
+        _package.set("OID_ifMtu",              LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.4"));
+        _package.set("OID_ifSpeed",            LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.5"));
+        _package.set("OID_ifPhysAddress",      LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.6"));
+        _package.set("OID_ifAdminStatus",      LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.7"));
+        _package.set("OID_ifOperStatus",       LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.8"));
+        _package.set("OID_ifLastChange",       LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.9"));
+        _package.set("OID_ifInOctets",         LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.10"));
+        _package.set("OID_ifInUcastPkts",      LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.11"));
+        _package.set("OID_ifInNUcastPkts",     LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.12"));
+        _package.set("OID_ifInDiscards",       LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.13"));
+        _package.set("OID_ifInErrors",         LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.14"));
+        _package.set("OID_ifInUnknownProtos",  LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.15"));
+        _package.set("OID_ifOutOctets",        LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.16"));
+        _package.set("OID_ifOutUcastPkts",     LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.17"));
+        _package.set("OID_ifOutNUcastPkts",    LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.18"));
+        _package.set("OID_ifOutDiscards",      LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.19"));
+        _package.set("OID_ifOutErrors",        LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.20"));
+        _package.set("OID_ifOutQLen",          LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.21"));
+        _package.set("OID_ifSpecific",         LuaValue.valueOf(".1.3.6.1.2.1.2.2.1.22"));
     }
 
     static Map<String,SnmpSession> _sessions = new HashMap<>();
@@ -322,3 +469,10 @@ public class SnmpLib extends AbstractLibrary implements LuayLibraryFactory
     }
 
 }
+/*
+%!begin MARKDOWN
+
+\pagebreak
+
+%!end MARKDOWN
+ */

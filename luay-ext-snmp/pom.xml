@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.github.terefang.luay</groupId>
         <artifactId>luay</artifactId>
-        <version>2023.10.231</version>
+        <version>2023.12.240</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -51,6 +51,27 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>com.github.terefang.template</groupId>
+                <artifactId>preproc-maven-plugin</artifactId>
+                <version>2023.11.378</version>
+                <executions>
+                    <execution>
+                        <id>pre-proc-md</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>pre-processor</goal>
+                        </goals>
+                        <configuration>
+                            <resourcesDirectory>${project.basedir}/src/main/java</resourcesDirectory>
+                            <marker>MARKDOWN</marker>
+                            <singleFileOutput>true</singleFileOutput>
+                            <includes>luay/lib/ext/*.java</includes>
+                            <resourcesOutput>${project.basedir}/../doc/83-ext-snmp.md</resourcesOutput>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>eu.somatik.serviceloader-maven-plugin</groupId>
                 <artifactId>serviceloader-maven-plugin</artifactId>
@@ -99,4 +120,10 @@
             <url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases/</url>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </pluginRepository>
+    </pluginRepositories>
 </project>

@@ -1,4 +1,10 @@
-local _http = require('snmp')
+_rc = pcall(function ()
+
+    local _http = require('snmp')
+
+end)
+
+print(_rc)
 
 local _c = snmp.snmpv2('fredonas.local');
 

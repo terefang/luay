@@ -24,8 +24,10 @@ package luay.vm.lib;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
+import luay.main.LuayHelper;
 import luay.vm.*;
 import luay.vm.compiler.DumpState;
 import luay.vm.lib.java.CoerceLuaToJava;
@@ -114,14 +116,18 @@ public class StringLib extends TwoArgFunction {
 		string.set("upper", new upper());
 
 		// luay extension
-		string.set("toutf8", new toutf8());
+		string.set("to_utf8", new _to_utf8());
 		string.set("split", new _split());
 		string.set("explode", new _explode());
 		string.set("implode", new _implode());
 		string.set("concat", new _concat());
 		string.set("mformat", new _mformat());
 		string.set("sformat", new _sformat());
-
+		string.set("to_int", new _to_int());
+		string.set("to_long" , new _to_long());
+		string.set("to_bool" , new _to_bool());
+		string.set("to_float" , new _to_float());
+		string.set("to_double" , new _to_double());
 		env.set("string", string);
 		if (!env.get("package").isnil())
 			env.get("package").get("loaded").set("string", string);
@@ -131,9 +137,91 @@ public class StringLib extends TwoArgFunction {
 		return string;
 	}
 
-	static final class toutf8 extends OneArgFunction {
+	static final class _to_utf8 extends OneArgFunction {
 		public LuaValue call(LuaValue arg) {
 			return LuaUtf8String.valueOfString(arg.tojstring());
+		}
+	}
+
+	static final class _to_int extends OneArgFunction {
+		public LuaValue call(LuaValue arg) {
+			try
+			{
+				return LuaValue.valueOf(Integer.valueOf(arg.tojstring()));
+			}
+			catch (Exception _xe)
+			{
+				error(_xe.getMessage());
+				return LuaValue.NONE;
+			}
+		}
+	}
+	static final class _to_long extends OneArgFunction {
+		public LuaValue call(LuaValue arg) {
+			try
+			{
+				return LuaValue.valueOf(Long.valueOf(arg.tojstring()));
+			}
+			catch (Exception _xe)
+			{
+				error(_xe.getMessage());
+				return LuaValue.NONE;
+			}
+		}
+	}
+
+	static final class _to_float extends OneArgFunction {
+		public LuaValue call(LuaValue arg) {
+			try
+			{
+				return LuaDouble.valueFrom(Float.valueOf(arg.tojstring()));
+			}
+			catch (Exception _xe)
+			{
+				error(_xe.getMessage());
+				return LuaValue.NONE;
+			}
+		}
+	}
+
+	static final class _to_bool extends OneArgFunction {
+		public LuaValue call(LuaValue arg) {
+			try
+			{
+				if(arg.toboolean()==false) return LuaValue.FALSE;
+
+				if(arg.isboolean()) return arg;
+
+				// any defined string is "true" unless it is a false indicator:
+				// false, f, off, none, no, n, null, nul, nil, 0, <blank>
+				for(String _test : Arrays.asList("false", "f", "off", "none", "n", "no", "null", "nul", "nil", "0", ""))
+				{
+					if(arg.tojstring().equalsIgnoreCase(_test))
+					{
+						return LuaValue.FALSE;
+					}
+				}
+				return LuaValue.TRUE;
+			}
+			catch (Exception _xe)
+			{
+				error(_xe.getMessage());
+				return LuaValue.NONE;
+			}
+		}
+	}
+
+	static final class _to_double extends OneArgFunction {
+		public LuaValue call(LuaValue arg) {
+			try
+			{
+				return LuaDouble.valueFrom(Double.valueOf(arg.tojstring()));
+			}
+			catch (Exception _xe)
+			{
+				error(_xe.getMessage());
+				return LuaValue.NONE;
+			}
 		}
 	}
 	/**
@@ -1502,7 +1590,7 @@ public class StringLib extends TwoArgFunction {
 
 			for (int i = 2; i <= _args.narg(); i++)
 			{
-				_objs[i-2] = CoerceLuaToJava.convert(_args.arg(i));
+				_objs[i-2] = LuayHelper.valueToJava(_args.arg(i));
 			}
 
 			return LuaString.valueOf(String.format(_pattern, _objs));

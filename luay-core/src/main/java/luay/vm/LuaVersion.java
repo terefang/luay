@@ -24,6 +24,6 @@ package luay.vm;
 
 public class LuaVersion {
 	/** version is supplied by ant build task */
-	public static final String _VERSION = "Luay 2023.10.231 (lua-5.2)";
+	public static final String _VERSION = "Luay 2023.12.240 (lua-5.2)";
 
 }
