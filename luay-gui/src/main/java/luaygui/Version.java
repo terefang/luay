@@ -1,5 +1,5 @@
 package luaygui;
 
 public class Version {
-    public static final String _VERSION = "2023.12.240-20240228+2350";
+    public static final String _VERSION = "2024.4.241-20240419+0843";
 }
