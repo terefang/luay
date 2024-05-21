@@ -97,6 +97,15 @@ public class SqlLib extends AbstractLibrary implements LuayLibraryFactory
 
 	}
 
+	public static final class _duckdb extends _driver {
+		public _duckdb() { super(); }
+
+		@Override
+		DAO _createDao(String _suffix, String _user, String _pass) {
+			return DaoUtil.duckdbDao(true,_suffix,_user, _pass);
+		}
+	}
+
 	public static final class _sqlite extends _driver {
 		public _sqlite() { super(); }
 

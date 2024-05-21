@@ -102,6 +102,7 @@ public class StringLib extends TwoArgFunction {
 		LuaTable string = new LuaTable();
 		string.set("byte", new _byte());
 		string.set("char", new _char());
+		string.set("chr", new _chr());
 		string.set("dump", new dump());
 		string.set("find", new find());
 		string.set("format", new format());
@@ -281,6 +282,14 @@ public class StringLib extends TwoArgFunction {
 				bytes[i] = (byte) c;
 			}
 			return LuaString.valueUsing(bytes);
+		}
+	}
+
+	static final class _chr extends VarArgFunction {
+		@Override
+		public Varargs invoke(Varargs args) {
+			int n = args.narg();
+			return LuaUtf8String.valueOf(Character.toString(n));
 		}
 	}
 

@@ -17,6 +17,7 @@ public class DAO implements AutoCloseable
         DB_TYPE_DB2,
         DB_TYPE_H2,
         DB_TYPE_SQLITE,
+        DB_TYPE_DUCKDB,
         DB_TYPE_CRATE,
         DB_TYPE_ANSI,
         DB_TYPE_MYSQL

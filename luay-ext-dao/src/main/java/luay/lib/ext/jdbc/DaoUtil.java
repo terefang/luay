@@ -297,6 +297,26 @@ public class DaoUtil
         return sqliteDao(true, _hostPortDb, _user, _pass, null);
     }
 
+    public static DAO duckdbDao(boolean _cds, String _hostPortDb, String _user, String _pass, Properties _infos) {
+        DAO _dao = daoFromJdbc(_cds, "", "jdbc:duckdb:" + _hostPortDb, _user, _pass, _infos);
+        _dao.setDbType(DAO.DbType.DB_TYPE_DUCKDB);
+        return _dao;
+    }
+
+    public static DAO duckdbDao(boolean _cds, String _hostPortDb, String _user, String _pass) {
+        return duckdbDao(_cds, _hostPortDb, _user, _pass, null);
+    }
+
+    public static DAO duckdbDao(String _hostPortDb, String _user, String _pass, Properties _infos)
+    {
+        return duckdbDao(true, _hostPortDb, _user, _pass, _infos);
+    }
+
+    public static DAO duckdbDao(String _hostPortDb, String _user, String _pass)
+    {
+        return duckdbDao(true, _hostPortDb, _user, _pass, null);
+    }
+
     public static DAO pgsqlDao(boolean _cds, String _hostPortDb, String _user, String _pass, Properties _infos) {
         DAO _dao = daoFromJdbc(_cds, "org.postgresql.Driver", "jdbc:postgresql://" + _hostPortDb, _user, _pass, _infos);
         _dao.setDbType(DAO.DbType.DB_TYPE_POSTGRES);

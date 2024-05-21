@@ -57,6 +57,7 @@ Refer: http://www.lua.org/manual/5.3/manual.html#6.4.2
 
 ### Luay Extensions
 
+*   `string.chr (n) -> string`
 *   `string.concat(v1[,...,vN]) -> string`
 *   `string.concat(table) -> string`
   
