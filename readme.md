@@ -190,13 +190,13 @@ see docs
 - [ ] evaluate commonly packaged modules, what to implement
     - [ ] https://github.com/Tieske/binaryheap.lua
     - [x] lua-alt-getopt-0.8.0-1 --> adopted in "getopt" module
-    - [ ] lua-basexx-0.4.0-2	BaseXX encoding and decoding library for Lua
+    - [ ] lua-basexx-0.4.0-2	--> adopted in "hash" module
     - [ ] lua-binaryheap-0.4-1	Binary heap implementation for Lua
     - [x] lua-bit32-5.3.5.1-1	--> adopted in "bit32" and "bit64" module
     - [x] lua5.1-bitop-1.0.2-5	--> adopted in "bit32" and "bit64" module
     - [ ] lua-compat53-0.7-3	Compatibility module providing Lua-5.3-style APIs for Lua 5.1
     - [ ] lua-cqueues-20190813-3	Stackable Continuation Queues for the Lua Programming Language
-    - [ ] lua-cyrussasl-1.1.0-1	Cyrus SASL library for Lua
+    - [-] lua-cyrussasl-1.1.0-1	--> not in scope
     - [ ] lua-cjson-2.1.0.12-1	Lua Extension: JSON Encoding/Decoding
     - [x] lua-dbi-0.7.2-1	--> adopted in "dao" module
     - [ ] lua-event-0.4.6-1	This is a binding of libevent to Lua
@@ -218,8 +218,8 @@ see docs
     - [ ] lua-posix-32-2	A POSIX library for Lua
     - [ ] lua-prelude-5.2.0-2	Lua bindings for prelude
     - [ ] lua-psl-0.3-2	Lua bindings to Public Suffix List library
-    - [-] lua-readline-3.2-1	--> not in scape
-    - [-] lua-sec-1.2.0-1	--> not in scape
-    - [-] lua-socket-3.1.0-1	--> not in scape
-    - [-] lua-term-0.03-3	--> not in scape
-    - [-] lua-unbound-1.0.0-1	--> not in scape
+    - [-] lua-readline-3.2-1	--> not in scope
+    - [-] lua-sec-1.2.0-1	--> not in scope
+    - [-] lua-socket-3.1.0-1	--> not in scope
+    - [-] lua-term-0.03-3	--> not in scope
+    - [-] lua-unbound-1.0.0-1	--> not in scope
