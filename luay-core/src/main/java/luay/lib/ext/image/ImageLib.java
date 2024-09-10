@@ -9,6 +9,8 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.List;
 
@@ -223,6 +225,8 @@ public class ImageLib extends AbstractLibrary implements LuayLibraryFactory
 		}
 
 		public void gSet(int _x, int _y, long _color) { try { this._img.setRGB(_x, _y, (int)_color);}catch(Exception _xe){} }
+
+		public int gGet(int _x, int _y) { try { return this._img.getRGB(_x, _y);}catch(Exception _xe){ return 0;} }
 
 		public void gLine(int _x1, int _y1, int _x2, int _y2, long _color)
 		{
@@ -556,6 +560,16 @@ public class ImageLib extends AbstractLibrary implements LuayLibraryFactory
 			endText();
 		}
 
+		public int getHeight()
+		{
+			return this._img.getHeight();
+		}
+
+		public int getWidth()
+		{
+			return this._img.getWidth();
+		}
+
 		public static Color createColor(long _color)
 		{
 			return new Color((int)_color, true);
@@ -728,6 +742,13 @@ public class ImageLib extends AbstractLibrary implements LuayLibraryFactory
 		);
 	}
 
+	// image.load0(path) -> image
+	@SneakyThrows
+	public static LuaValue _load(Varargs args) {
+		String _f = args.checkjstring(1);
+		return LuaValue.userdataOf(ImageLibHolder.from(new File(_f)));
+	}
+
 	// image.create(h, w) -> image
 	@SneakyThrows
 	public static LuaValue _create(Varargs args) {
@@ -750,7 +771,15 @@ public class ImageLib extends AbstractLibrary implements LuayLibraryFactory
 		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
 		int _x = args.checkint(2);
 		int _y = args.checkint(3);
-		long _c = args.checklong(4);
+		long _c;
+		if(args.isnumber(4))
+		{
+			_c = args.checklong(4);
+		}
+		else
+		{
+			_c = from(args.checkjstring(4)).getRGB();
+		}
 		_ctx.gSet(_x,_y,_c);
 		return LuaValue.NONE;
 	}
@@ -822,5 +851,500 @@ public class ImageLib extends AbstractLibrary implements LuayLibraryFactory
 			_ctx.gString((Font) _font, _x, _y+((Font)_font).getSize(), _text, _c1);
 		}
 		return LuaValue.NONE;
+	}
+
+
+	// ---------------------------------------------------------------------------------------------
+	public static Color fromRgbA(int _r, int _g, int _b, int _a)
+	{
+		return new Color(_r, _g,_b,_a);
+	}
+	public static Color fromRgb(int _r, int _g, int _b)
+	{
+		return fromRgbA(_r,_g,_b,255);
+	}
+
+	public static Color fromRgbA(float _r, float _g, float _b, float _a)
+	{
+		return new Color(_r, _g,_b,_a);
+	}
+	public static Color fromRgb(float _r, float _g, float _b)
+	{
+		return fromRgbA(_r,_g,_b,1f);
+	}
+
+	public static Color fromGreyA(float _g, float _a)
+	{
+		return new Color(_g, _g,_g,_a);
+	}
+
+	public static Color fromGrey(float _g)
+	{
+		return fromGreyA(_g,1f);
+	}
+
+	public static Color fromGreyA(int _g, int _a)
+	{
+		return new Color(_g, _g,_g,_a);
+	}
+
+	public static Color fromGrey(int _g)
+	{
+		return fromGreyA(_g,255);
+	}
+
+	public static Color fromHSV(float h, float s, float v) {
+		h /= 60f;
+		s /= 100f;
+		v /= 100f;
+		int hi = (int) (Math.floor(h) % 6);
+
+		float f = (float) (h - Math.floor(h));
+		int p = (int) (255 * v * (1 - s));
+		int q = (int) (255 * v * (1 - (s * f)));
+		int t = (int) (255 * v * (1 - (s * (1 - f))));
+		v *= 255;
+
+		switch (hi) {
+			case 1:
+				return fromRgb(q, (int)v, p);
+			case 2:
+				return fromRgb(p, (int)v, t);
+			case 3:
+				return fromRgb(p, q, (int)v);
+			case 4:
+				return fromRgb(t, p, (int)v);
+			case 5:
+				return fromRgb((int)v, p, q);
+			case 0:
+			default:
+				return fromRgb((int)v, t, p);
+		}
+	}
+
+	public static Color fromHSL(float h, float s, float l)
+	{
+		h = h % 360.0f;
+		h /= 360f;
+		s /= 100f;
+		l /= 100f;
+
+		float q = 0;
+
+		if (l < 0.5)
+			q = l * (1 + s);
+		else
+			q = (l + s) - (s * l);
+
+		float p = 2 * l - q;
+
+		float r = Math.max(0, HueToRGB(p, q, h + (1.0f / 3.0f)));
+		float g = Math.max(0, HueToRGB(p, q, h));
+		float b = Math.max(0, HueToRGB(p, q, h - (1.0f / 3.0f)));
+
+		r = Math.min(r, 1.0f)*255;
+		g = Math.min(g, 1.0f)*255;
+		b = Math.min(b, 1.0f)*255;
+
+		return fromRgb((int)r, (int)g, (int)b);
+	}
+
+	static float HueToRGB(float p, float q, float h)
+	{
+		if (h < 0)
+			h += 1;
+
+		if (h > 1)
+			h -= 1;
+
+		if (6 * h < 1) {
+			return p + ((q - p) * 6 * h);
+		}
+
+		if (2 * h < 1) {
+			return q;
+		}
+
+		if (3 * h < 2) {
+			return p + ((q - p) * 6 * ((2.0f / 3.0f) - h));
+		}
+
+		return p;
+	}
+
+	static double HueToRGB(double p, double q, double h) {
+		if (h < 0)
+			h += 1;
+
+		if (h > 1)
+			h -= 1;
+
+		if (6 * h < 1) {
+			return p + ((q - p) * 6 * h);
+		}
+
+		if (2 * h < 1) {
+			return q;
+		}
+
+		if (3 * h < 2) {
+			return p + ((q - p) * 6 * ((2.0f / 3.0f) - h));
+		}
+
+		return p;
+	}
+
+	// l = +/-100, a/b = +/-125
+	public static Color fromLAB(float l, float a, float b)
+	{
+		float x;
+		float y;
+		float z;
+
+		y = (l + 16f) / 116f;
+		x = a / 500f + y;
+		z = y - b / 200f;
+
+		float y2 = (float) Math.pow(y, 3);
+		float x2 = (float) Math.pow(x, 3);
+		float z2 = (float) Math.pow(z, 3);
+		y = y2 > 0.008856f ? y2 : (y - 16f / 116f) / 7.787f;
+		x = x2 > 0.008856f ? x2 : (x - 16f / 116f) / 7.787f;
+		z = z2 > 0.008856f ? z2 : (z - 16f / 116f) / 7.787f;
+
+		x *= 95.047f;
+		y *= 100f;
+		z *= 108.883f;
+
+		return fromXYZ(x, y, z);
+	}
+
+	public static Color fromXYZ(float x, float y, float z)
+	{
+		x /= 100f;
+		y /= 100f;
+		z /= 100f;
+		float r;
+		float g;
+		float b;
+
+		r = (x * 3.2406f) + (y * -1.5372f) + (z * -0.4986f);
+		g = (x * -0.9689f) + (y * 1.8758f) + (z * 0.0415f);
+		b = (x * 0.0557f) + (y * -0.2040f) + (z * 1.0570f);
+
+		// assume sRGB
+		r = r > 0.0031308f
+				? (float) ((1.055f * Math.pow(r, 1.0f / 2.4f)) - 0.055f)
+				: r * 12.92f;
+
+		g = g > 0.0031308f
+				? (float) ((1.055f * Math.pow(g, 1.0f / 2.4f)) - 0.055f)
+				: g * 12.92f;
+
+		b = b > 0.0031308f
+				? (float) ((1.055f * Math.pow(b, 1.0f / 2.4f)) - 0.055f)
+				: b * 12.92f;
+
+		r = Math.min(Math.max(0, r), 1);
+		g = Math.min(Math.max(0, g), 1);
+		b = Math.min(Math.max(0, b), 1);
+
+		return fromRgb(
+				(int)(r * 255),
+				(int)(g * 255),
+				(int)(b * 255)
+		);
+	}
+
+	public static Color from(String _color)
+	{
+		_color = _color.trim().toLowerCase();
+
+		if(_color.startsWith("#") && _color.length()==4)
+		{
+			int _cr = Integer.parseInt(_color.substring(1,2).toUpperCase(),16);
+			_cr |= (_cr<<4);
+			int _cg = Integer.parseInt(_color.substring(2,3).toUpperCase(),16);
+			_cg |= (_cg<<4);
+			int _cb = Integer.parseInt(_color.substring(3,4).toUpperCase(),16);
+			_cb |= (_cb<<4);
+
+			return fromRgb(_cr,_cg,_cb);
+		}
+		else
+		if(_color.startsWith("#") && _color.length()==5)
+		{
+			int _cr = Integer.parseInt(_color.substring(1,2).toUpperCase(),16);
+			_cr |= (_cr<<4);
+			int _cg = Integer.parseInt(_color.substring(2,3).toUpperCase(),16);
+			_cg |= (_cg<<4);
+			int _cb = Integer.parseInt(_color.substring(3,4).toUpperCase(),16);
+			_cb |= (_cb<<4);
+			int _ca = Integer.parseInt(_color.substring(3,4).toUpperCase(),16);
+			_ca |= (_ca<<4);
+
+			return fromRgbA(_cr,_cg,_cb,_ca);
+		}
+		else
+		if(_color.startsWith("#") && _color.length()==7)
+		{
+			int _cr = Integer.parseInt(_color.substring(1,3).toUpperCase(),16);
+			int _cg = Integer.parseInt(_color.substring(3,5).toUpperCase(),16);
+			int _cb = Integer.parseInt(_color.substring(5,7).toUpperCase(),16);
+			return fromRgb(_cr,_cg,_cb);
+		}
+		else
+		if(_color.startsWith("#") && _color.length()==9)
+		{
+			int _cr = Integer.parseInt(_color.substring(1,3).toUpperCase(),16);
+			int _cg = Integer.parseInt(_color.substring(3,5).toUpperCase(),16);
+			int _cb = Integer.parseInt(_color.substring(5,7).toUpperCase(),16);
+			int _ca = Integer.parseInt(_color.substring(7,9).toUpperCase(),16);
+			return fromRgbA(_cr,_cg,_cb,_ca);
+		}
+		else
+		if(_color.startsWith("#") && _color.length()==10)
+		{
+			float _cr = Integer.parseInt(_color.substring(1,4).toUpperCase(),16)/((float)0xfff);
+			float _cg = Integer.parseInt(_color.substring(4,7).toUpperCase(),16)/((float)0xfff);
+			float _cb = Integer.parseInt(_color.substring(7,10).toUpperCase(),16)/((float)0xfff);
+			return fromRgb(_cr,_cg,_cb);
+		}
+		else
+		if(_color.startsWith("#") && _color.length()==13)
+		{
+			float _cr = Integer.parseInt(_color.substring(1,4).toUpperCase(),16)/((float)0xfff);
+			float _cg = Integer.parseInt(_color.substring(4,7).toUpperCase(),16)/((float)0xfff);
+			float _cb = Integer.parseInt(_color.substring(7,10).toUpperCase(),16)/((float)0xfff);
+			float _ca = Integer.parseInt(_color.substring(10,13).toUpperCase(),16)/((float)0xfff);
+			return fromRgbA(_cr,_cg,_cb,_ca);
+		}
+		else
+		{
+			return Color.MAGENTA;
+		}
+	}
+
+	// -- threshold filter
+	//
+	//level = 0.5
+	//
+	//for y=0, height-1 do
+	//	for x=0, width-1 do
+	//		v = get_value (x,y)
+	//		if v>level then
+	//			v=1.0
+	//		else
+	//			v=0.0
+	//		end
+	//		set_value (x,y,v)
+	//	end
+	//	progress (y/height)
+	//end
+	//
+	//-- gluas functions:
+	//-- ================
+	//--
+	//-- pixel setters and getters:
+	//--
+
+	//-- set_hsl (x,y,h,s,l)
+	@SneakyThrows
+	public static LuaValue _set_hsl(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		int _x = args.checkint(2);
+		int _y = args.checkint(3);
+		double _h = args.checkdouble(4)*360.;
+		double _s = args.checkdouble(5)*100.;
+		double _l = args.checkdouble(6)*100.;
+
+		long _c = fromHSL((float) _h, (float) _s, (float) _l).getRGB();
+
+		_ctx.gSet(_x,_y, _c);
+
+		return LuaValue.NONE;
+	}
+
+	//-- set_hsv (x,y,h,s,v)
+	@SneakyThrows
+	public static LuaValue _set_hsv(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		int _x = args.checkint(2);
+		int _y = args.checkint(3);
+		double _h = args.checkdouble(4)*360.;
+		double _s = args.checkdouble(5)*100.;
+		double _v = args.checkdouble(6)*100.;
+
+		long _c = fromHSV((float) _h, (float) _s, (float) _v).getRGB();
+
+		_ctx.gSet(_x,_y, _c);
+
+		return LuaValue.NONE;
+	}
+
+	//-- set_lab (x,y,l,a,b)
+	@SneakyThrows
+	public static LuaValue _set_lab(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		int _x = args.checkint(2);
+		int _y = args.checkint(3);
+		double _l = args.checkdouble(4)*360.;
+		double _a = args.checkdouble(5)*100.;
+		double _b = args.checkdouble(6)*100.;
+
+		long _c = fromLAB((float) _l, (float) _a, (float) _b).getRGB();
+
+		_ctx.gSet(_x,_y, _c);
+
+		return LuaValue.NONE;
+	}
+
+	//-- set_rgb (x,y,r,g,b)
+	@SneakyThrows
+	public static LuaValue _set_rgb(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		int _x = args.checkint(2);
+		int _y = args.checkint(3);
+		double _r = args.checkdouble(4);
+		double _g = args.checkdouble(5);
+		double _b = args.checkdouble(6);
+
+		long _c = fromRgb((float) _r, (float) _g, (float) _b).getRGB();
+
+		_ctx.gSet(_x,_y, _c);
+
+		return LuaValue.NONE;
+	}
+
+	//-- set_rgba (x,y,r,g,b,a)
+	@SneakyThrows
+	public static LuaValue _set_rgba(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		int _x = args.checkint(2);
+		int _y = args.checkint(3);
+		double _r = args.checkdouble(4);
+		double _g = args.checkdouble(5);
+		double _b = args.checkdouble(6);
+		double _a = args.checkdouble(7);
+
+		long _c = fromRgbA((float) _r, (float) _g, (float) _b, (float) _a).getRGB();
+
+		_ctx.gSet(_x,_y, _c);
+
+		return LuaValue.NONE;
+	}
+
+	//-- set_alpha (x,y,alpha)
+	@SneakyThrows
+	public static LuaValue _set_alpha(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		int _x = args.checkint(2);
+		int _y = args.checkint(3);
+		double _a = args.checkdouble(5);
+
+		Color _col = new Color(_ctx.gGet(_x,_y), true);
+
+		_col = new Color(_col.getRed()/255f, _col.getGreen()/255f, _col.getBlue()/255f, (float) _a);
+
+		long _c = _col.getRGB();
+
+		_ctx.gSet(_x,_y, _c);
+
+		return LuaValue.NONE;
+	}
+
+	//-- set_value (x,y,value)
+	@SneakyThrows
+	public static LuaValue _set_value(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		int _x = args.checkint(2);
+		int _y = args.checkint(3);
+		double _v = args.checkdouble(5);
+
+		long _c = fromRgb((float) _v, (float) _v, (float) _v).getRGB();
+
+		_ctx.gSet(_x,_y, _c);
+
+		return LuaValue.NONE;
+	}
+
+	//-- a       = get_alpha (x,y)
+	@SneakyThrows
+	public static LuaValue _get_alpha(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		int _x = args.checkint(2);
+		int _y = args.checkint(3);
+
+		return LuaDouble.valueOf((double)new Color(_ctx.gGet(_x,_y), true).getAlpha());
+	}
+
+	//-- v       = get_value (x,y)
+	@SneakyThrows
+	public static LuaValue _get_value(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		int _x = args.checkint(2);
+		int _y = args.checkint(3);
+		Color _col = new Color(_ctx.gGet(_x,_y), true);
+		return LuaDouble.valueOf((double)((_col.getBlue()+_col.getGreen()+_col.getRed())/3.));
+	}
+
+	//-- h,s,l   = get_hsl   (x,y)
+	//-- h,s,v   = get_hsv   (x,y)
+	//-- l,a,b   = get_lab   (x,y)
+
+	//-- r,g,b   = get_rgb   (x,y)
+	@SneakyThrows
+	public static Varargs _get_rgb(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		int _x = args.checkint(2);
+		int _y = args.checkint(3);
+		Color _col = new Color(_ctx.gGet(_x,_y), true);
+		return LuaValue.varargsOf(
+				LuaDouble.valueOf((double)_col.getRed()),
+				LuaDouble.valueOf((double)_col.getGreen()),
+				LuaDouble.valueOf((double)_col.getBlue()));
+	}
+
+	//-- r,g,b,a = get_rgba  (x,y)
+	@SneakyThrows
+	public static Varargs _get_rgba(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		int _x = args.checkint(2);
+		int _y = args.checkint(3);
+		Color _col = new Color(_ctx.gGet(_x,_y), true);
+		return LuaValue.varargsOf(
+				LuaDouble.valueOf((double)_col.getRed()),
+				LuaDouble.valueOf((double)_col.getGreen()),
+				LuaDouble.valueOf((double)_col.getBlue()),
+				LuaDouble.valueOf((double)_col.getAlpha()));
+	}
+
+	//--
+	//-- special functions:
+	//--
+	//-- flush() - commit changes to image being processed
+	//-- process(ratio) - sets progress bar,. 0.0 = none 1.0 = full
+
+	// additional aux functions
+
+	//-- h   = get_height   (image)
+	@SneakyThrows
+	public static LuaValue _get_heigth(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		return LuaInteger.valueOf(_ctx._img.getHeight());
+	}
+
+	//-- w   = get_width   (image)
+	@SneakyThrows
+	public static LuaValue _get_width(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		return LuaInteger.valueOf(_ctx._img.getWidth());
+	}
+
+	//-- h,w   = get_height_width   (image)
+	@SneakyThrows
+	public static Varargs _get_height_width(Varargs args) {
+		ImageLibHolder _ctx = (ImageLibHolder)args.checkuserdata(1, ImageLibHolder.class);
+		return LuaValue.varargsOf(LuaInteger.valueOf(_ctx._img.getHeight()),LuaInteger.valueOf(_ctx._img.getWidth()));
 	}
 }

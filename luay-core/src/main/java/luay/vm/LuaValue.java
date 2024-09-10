@@ -21,6 +21,7 @@
 ******************************************************************************/
 package luay.vm;
 
+import luay.vm.compiler.Constants;
 import luay.vm.lib.java.JsePlatform;
 
 /**
@@ -274,16 +275,13 @@ abstract public class LuaValue extends Varargs {
 	/** LuaString constant with value "" */
 	public static final LuaString EMPTYSTRING = valueOf("");
 
-	/** Limit on luay.main.lua stack size */
-	private static int MAXSTACK = 250;
-
-	/**
+		/**
 	 * Array of {@link #NIL} values to optimize filling stacks using
 	 * System.arraycopy(). Must not be modified.
 	 */
-	public static final LuaValue[] NILS = new LuaValue[MAXSTACK];
+	public static final LuaValue[] NILS = new LuaValue[Constants.MAXSTACK];
 	static {
-		for (int i = 0; i < MAXSTACK; i++)
+		for (int i = 0; i < Constants.MAXSTACK; i++)
 			NILS[i] = NIL;
 	}
 
@@ -3952,6 +3950,47 @@ abstract public class LuaValue extends Varargs {
 		error("attempt to index ? (a " + typename() + " value) with key '" + key + "'");
 	}
 
+
+	/**
+	 * Construct a {@link Varargs} from {@link LuaValue}s.
+	 */
+	public static Varargs varargsOf(final LuaValue v1, final LuaValue v2)
+	{
+		return new Varargs.PairVarargs(v1, v2);
+	}
+
+	/**
+	 * Construct a {@link Varargs} from {@link LuaValue}s.
+	 */
+	public static Varargs varargsOf(final LuaValue v1, final LuaValue v2, final LuaValue v3)
+	{
+		return new Varargs.ArrayVarargs(v1, v2, v3);
+	}
+
+	/**
+	 * Construct a {@link Varargs} from {@link LuaValue}s.
+	 */
+	public static Varargs varargsOf(final LuaValue v1, final LuaValue v2, final LuaValue v3, final LuaValue v4)
+	{
+		return new Varargs.ArrayVarargs(v1, v2, v3, v4);
+	}
+
+	/**
+	 * Construct a {@link Varargs} from {@link LuaValue}s.
+	 */
+	public static Varargs varargsOf(final LuaValue v1, final LuaValue v2, final LuaValue v3, final LuaValue v4, final LuaValue v5)
+	{
+		return new Varargs.ArrayVarargs(v1, v2, v3, v4, v5);
+	}
+
+	/**
+	 * Construct a {@link Varargs} from {@link LuaValue}s.
+	 */
+	public static Varargs varargsOf(final LuaValue v1, final LuaValue v2, final LuaValue v3, final LuaValue v4, final LuaValue v5, final LuaValue v6)
+	{
+		return new Varargs.ArrayVarargs(v1, v2, v3, v4, v5, v6);
+	}
+
 	/**
 	 * Construct a {@link Varargs} around an array of {@link LuaValue}s.
 	 *
@@ -3962,14 +4001,14 @@ abstract public class LuaValue extends Varargs {
 	 */
 	public static Varargs varargsOf(final LuaValue[] v) {
 		switch (v.length) {
-		case 0:
-			return NONE;
-		case 1:
-			return v[0];
-		case 2:
-			return new Varargs.PairVarargs(v[0], v[1]);
-		default:
-			return new Varargs.ArrayVarargs(v, NONE);
+			case 0:
+				return NONE;
+			case 1:
+				return v[0];
+			case 2:
+				return new Varargs.PairVarargs(v[0], v[1]);
+			default:
+				return new Varargs.ArrayVarargs(v, NONE);
 		}
 	}
 

@@ -832,6 +832,11 @@ public abstract class Varargs {
 			this.r = r;
 		}
 
+		ArrayVarargs(LuaValue... v) {
+			this.v = v;
+			this.r = LuaValue.NONE;
+		}
+
 		@Override
 		public LuaValue arg(int i) {
 			return i < 1? LuaValue.NIL: i <= v.length? v[i-1]: r.arg(i-v.length);
