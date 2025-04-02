@@ -23,10 +23,7 @@ package luay.vm.lib;
 
 import java.util.Random;
 
-import luay.vm.LuaDouble;
-import luay.vm.LuaTable;
-import luay.vm.LuaValue;
-import luay.vm.Varargs;
+import luay.vm.*;
 import luay.vm.lib.java.JsePlatform;
 
 /**
@@ -129,6 +126,9 @@ public class MathLib extends TwoArgFunction {
 		math.set("sinh", new sinh());
 		math.set("tanh", new tanh());
 
+		// extensions
+		math.set("int", new _int());
+		
 		env.set("math", math);
 		if (!env.get("package").isnil())
 			env.get("package").get("loaded").set("math", math);
@@ -378,9 +378,18 @@ public class MathLib extends TwoArgFunction {
 		@Override
 		protected double call(double d) { return Math.sinh(d); }
 	}
-
+	
 	static final class tanh extends UnaryOp {
 		@Override
 		protected double call(double d) { return Math.tanh(d); }
+	}
+
+	// luay extensions
+	static final class _int extends OneArgFunction {
+		@Override
+		public LuaValue call(LuaValue arg)
+		{
+			return LuaInteger.valueOf(Double.valueOf(arg.checkdouble()).longValue());
+		}
 	}
 }

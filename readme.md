@@ -17,8 +17,6 @@ see docs
 - [ ] evaluate https://github.com/aiq/luazdf, what to implement
   - [ ] algo/algo
   - [ ] algo/luhn/luhn
-  - [x] arr/* --> adapted in "array" module
-  - [X] base/* --> adapted in "hash" module
   - [ ] cal/cal
   - [ ] cal/dayofweek/dayofweek
   - [ ] cal/gregdate/gregdate
@@ -57,7 +55,6 @@ see docs
   - [ ] fn/once/once
   - [ ] fn/partial/partial
   - [ ] fn/repeatedly/repeatedly
-  - [x] fs/* --> adapted in "lfs" module
   - [ ] graph/addedge/addedge
   - [ ] graph/adjmatrix/adjmatrix
   - [ ] graph/buildgraph/buildgraph
@@ -118,14 +115,8 @@ see docs
   - [ ] str/charat/charat
   - [ ] str/chomp/chomp
   - [ ] str/countmatch/countmatch
-  - [ ] str/cutstr/cutstr
-  - [ ] str/endswithany/endswithany
-  - [ ] str/endswith/endswith
   - [ ] str/expandtabs/expandtabs
-  - [ ] str/explode/explode
   - [ ] str/findbyte/findbyte
-  - [ ] str/firstchar/firstchar
-  - [ ] str/hammingdistance/hammingdistance
   - [ ] str/isalnum/isalnum
   - [ ] str/isalpha/isalpha
   - [ ] str/isblank/isblank
@@ -133,27 +124,20 @@ see docs
   - [ ] str/isdigit/isdigit
   - [ ] str/isxdigit/isxdigit
   - [ ] str/kebabcase/kebabcase
-  - [ ] str/lastchar/lastchar
   - [ ] str/leftpad/leftpad
   - [ ] str/linecol/linecol
   - [ ] str/lines/lines
   - [ ] str/logline/logline
-  - [ ] str/ltrim/ltrim
   - [ ] str/lualiteral/lualiteral
   - [ ] str/mint/mint
   - [ ] str/numeronym/numeronym
   - [ ] str/rightpad/rightpad
   - [ ] str/rmprefix/rmprefix
   - [ ] str/rmsuffix/rmsuffix
-  - [ ] str/rtrim/rtrim
   - [ ] str/serialize/serialize
   - [ ] str/snakecase/snakecase
-  - [ ] str/split/split
-  - [ ] str/startswithany/startswithany
-  - [ ] str/startswith/startswith
   - [ ] str/str
   - [ ] str/strlstlen/strlstlen
-  - [ ] str/trim/trim
   - [ ] str/utf8codes/utf8codes
   - [ ] sys/capexec/capexec
   - [ ] sys/capinexec/capinexec
@@ -223,3 +207,5 @@ see docs
     - [-] lua-socket-3.1.0-1	--> not in scope
     - [-] lua-term-0.03-3	--> not in scope
     - [-] lua-unbound-1.0.0-1	--> not in scope
+
+https://github.com/CDSoft/luax/blob/master/doc/crypt.md

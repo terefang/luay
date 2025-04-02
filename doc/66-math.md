@@ -36,4 +36,8 @@ Refer: http://www.lua.org/manual/5.2/manual.html#6.6
 *   `math.tan (x)`
 *   `math.tanh (x)`
 
+### Luay Extensions
+
+*   `math.int (x) -> i`
+
 \pagebreak
